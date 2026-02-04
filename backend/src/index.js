@@ -19,6 +19,7 @@ app.use(express.json());
 app.use('/api', exampleRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/citizen', citizenRoutes);
+app.use('/api/contractor', require('./routes/contractor/index.routes'));
 app.use('/api/announcements', require('./routes/announcement.routes'));
 
 // Health Check

@@ -5,6 +5,7 @@ import { useAuth } from './context/AuthProvider';
 import Landing from './pages/Landing';
 import AdminDashboard from './pages/admin/Dashboard';
 import CitizenDashboard from './pages/citizen/Dashboard';
+import ContractorDashboard from './pages/contractor/Dashboard';
 import AdminIssues from './pages/admin/AdminIssues';
 import IssueDetails from './pages/admin/IssueDetails';
 import ResourceOptimization from './pages/admin/ResourceOptimization';
@@ -57,6 +58,11 @@ function App() {
                                             Dashboard
                                         </Link>
                                     )}
+                                    {role === 'contractor' && (
+                                        <Link to="/contractor" className="text-secondary hover:text-secondary-hover font-medium transition-colors">
+                                            Job Board
+                                        </Link>
+                                    )}
                                     <LogoutButton />
                                 </div>
                             </div>
@@ -66,12 +72,25 @@ function App() {
 
                 {/* Main Content Area */}
                 <Routes>
-                    <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Landing />} />
+                    <Route
+                        path="/"
+                        element={
+                            user ? (
+                                !role ? <Navigate to="/dashboard" /> :
+                                    role === 'admin' ? <Navigate to="/admin" /> :
+                                        role === 'contractor' ? <Navigate to="/contractor" /> :
+                                            <Navigate to="/dashboard" />
+                            ) : <Landing />
+                        }
+                    />
                     <Route
                         path="/dashboard"
                         element={
                             <ProtectedRoute>
-                                <CitizenDashboard />
+                                {!role ? <div className="p-20 text-center">Loading Profile...</div> :
+                                    role === 'citizen' ? <CitizenDashboard /> :
+                                        role === 'admin' ? <Navigate to="/admin" /> :
+                                            <Navigate to="/contractor" />}
                             </ProtectedRoute>
                         }
                     />
@@ -120,6 +139,16 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <ReportIssue />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/contractor"
+                        element={
+                            <ProtectedRoute>
+                                {role === 'contractor' ? <ContractorDashboard /> :
+                                    !role ? <div className="p-20 text-center">Identifying Role...</div> :
+                                        <Navigate to="/" />}
                             </ProtectedRoute>
                         }
                     />

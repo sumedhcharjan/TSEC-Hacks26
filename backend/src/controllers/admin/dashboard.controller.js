@@ -82,6 +82,10 @@ const getReportById = async (req, res) => {
                 profiles:user_id (
                     email,
                     full_name
+                ),
+                work_orders:work_orders(
+                    *,
+                    contractor:profiles!contractor_id(full_name, email)
                 )
             `)
             .eq('id', id)
