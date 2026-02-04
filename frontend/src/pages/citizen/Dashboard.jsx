@@ -1,91 +1,134 @@
-
 import React, { useEffect, useState } from "react";
-import api from "../../services/api"; // Import the new axios instance
+import api from "../../services/api";
 import { useAuth } from "../../context/AuthProvider";
+import { Link } from "react-router-dom";
 
-const Profile = () => {
+const CitizenDashboard = () => {
     const { user } = useAuth();
-    const [data, setData] = useState(null);
+    const [reports, setReports] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Use centralized api instance
-        api.get('/example')
-            .then(res => setData(res.data))
-            .catch(console.error);
-    }, []);
+        // Fetch real reports from backend
+        const fetchReports = async () => {
+            try {
+                setLoading(true);
+                // Use user-specific endpoint for better performance
+                const response = await api.get(`/citizen/user/${user.id}`);
+                setReports(response.data);
+            } catch (error) {
+                console.error('Failed to fetch reports:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    console.log(user);
+        if (user?.id) {
+            fetchReports();
+        }
+    }, [user]);
+
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'Resolved': return 'bg-success/20 text-success';
+            case 'Pending': return 'bg-accent/20 text-accent';
+            default: return 'bg-secondary/20 text-secondary';
+        }
+    };
+
     return (
-        <div className="space-y-6">
-            {/* Header Section */}
-            <div className="bg-surface rounded-2xl shadow-sm border border-secondary/20 p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
-                <div className="flex-shrink-0">
-                    {user?.user_metadata?.avatar_url ? (
-                        <img
-                            src={user.user_metadata.avatar_url}
-                            alt="Profile"
-                            className="w-24 h-24 rounded-full border-4 border-primary/10 shadow-md"
-                        />
-                    ) : (
-                        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-3xl font-bold shadow-md">
-                            {user?.email?.charAt(0).toUpperCase()}
-                        </div>
-                    )}
+        <div className="space-y-8 max-w-5xl mx-auto">
+            {/* 1. Header Section */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-text-main">
+                        Hello, {user?.user_metadata?.full_name?.split(' ')[0] || 'Citizen'}!
+                    </h1>
+                    <p className="text-text-muted mt-1">
+                        Let's make our city better, one report at a time.
+                    </p>
                 </div>
+                <Link
+                    to="/report/new"
+                    className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-all transform hover:scale-105 hover:shadow-xl flex items-center gap-2"
+                >
+                    <span>+</span> Report Issue
+                </Link>
+            </div>
 
-                <div className="text-center md:text-left flex-1">
-                    <h2 className="text-3xl font-bold text-text-main">
-                        {user?.user_metadata?.full_name || 'Hackathon Participant'}
-                    </h2>
-                    <p className="text-gray-500 font-medium">{user?.email}</p>
-                    <div className="mt-3 flex flex-wrap justify-center md:justify-start gap-2">
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-success/20 text-success">
-                            Active Session
-                        </span>
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary">
-                            Supabase Auth
-                        </span>
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-secondary/20 text-secondary">
-                            Start Building
-                        </span>
+            {/* 2. Stats Overview */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="bg-surface p-6 rounded-xl shadow-sm border border-secondary/10 hover:shadow-md transition-shadow">
+                    <p className="text-sm text-text-muted font-medium">Total Reports</p>
+                    <p className="text-3xl font-bold text-primary mt-1">{reports.length}</p>
+                </div>
+                <div className="bg-surface p-6 rounded-xl shadow-sm border border-secondary/10 hover:shadow-md transition-shadow">
+                    <p className="text-sm text-text-muted font-medium">Resolved</p>
+                    <p className="text-3xl font-bold text-success mt-1">
+                        {reports.filter(r => r.status?.toUpperCase() === 'RESOLVED').length}
+                    </p>
+                </div>
+                {/* Gamification Badge */}
+                <div className="bg-gradient-to-br from-primary to-secondary p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-white md:col-span-1 col-span-2">
+                    <p className="text-xs font-medium opacity-80 uppercase tracking-wider">Impact Score</p>
+                    <div className="flex items-end gap-2 mt-1">
+                        <p className="text-3xl font-bold">Top 10%</p>
+                        <p className="text-sm opacity-80 mb-1">Citizen</p>
                     </div>
                 </div>
             </div>
 
-            {/* Content Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Backend Data Card */}
-                <div className="bg-surface rounded-2xl shadow-sm border border-secondary/10 p-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-semibold text-text-main">Backend Connection</h3>
-                        <div className={`w-3 h-3 rounded-full ${data ? 'bg-success' : 'bg-accent animate-pulse'}`}></div>
-                    </div>
-
-                    {data ? (
-                        <div className="bg-background rounded-xl p-4 border border-secondary/10 font-mono text-sm text-text-main overflow-auto max-h-60">
-                            <pre>{JSON.stringify(data, null, 2)}</pre>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-40 text-gray-400">
-                            <svg className="w-8 h-8 animate-spin mb-2" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <p>Fetching data...</p>
-                        </div>
-                    )}
+            {/* 3. Recent Activity List */}
+            <div className="bg-surface rounded-2xl shadow-sm border border-secondary/10 overflow-hidden">
+                <div className="px-6 py-4 border-b border-secondary/10 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-text-main">Your Recent Reports</h2>
+                    <button className="text-sm text-primary hover:text-primary-hover font-medium">View All</button>
                 </div>
 
-                {/* User Metadata Card */}
-                <div className="bg-surface rounded-2xl shadow-sm border border-secondary/10 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">User Metadata</h3>
-                    <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 font-mono text-sm text-green-400 overflow-auto max-h-60 custom-scrollbar">
-                        <pre>{JSON.stringify(user, null, 2)}</pre>
+                {loading ? (
+                    <div className="p-12 text-center">
+                        <div className="flex flex-col items-center gap-3">
+                            <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                            <p className="text-text-muted">Loading your activity...</p>
+                        </div>
                     </div>
-                </div>
+                ) : reports.length > 0 ? (
+                    <div className="divide-y divide-secondary/10">
+                        {reports.map((report) => (
+                            <div key={report.id} className="p-6 hover:bg-background transition-all cursor-pointer flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 group">
+                                <div className="flex items-start gap-4">
+                                    {/* Icon Placeholder */}
+                                    <div className="w-12 h-12 rounded-lg bg-background group-hover:scale-110 transition-transform flex items-center justify-center text-2xl shadow-sm">
+                                        {report.category?.includes('Road') ? '🛣️' :
+                                            report.category?.includes('Water') ? '💧' :
+                                                report.category?.includes('Garbage') ? '🗑️' :
+                                                    report.category?.includes('Streetlight') ? '💡' : '⚠️'}
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-text-main">{report.category || 'Unknown Issue'}</p>
+                                        <p className="text-sm text-text-muted mt-1">{report.description?.substring(0, 50)}...</p>
+                                        <p className="text-xs text-text-muted mt-1">
+                                            {new Date(report.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        </p>
+
+                                    </div>
+                                </div>
+                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(report.status)}`}>
+                                    {report.status}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="p-12 text-center">
+                        <p className="text-text-muted">You haven't reported any issues yet.</p>
+                        <Link to="/report/new" className="text-primary hover:underline mt-2 inline-block">Start now</Link>
+                    </div>
+                )}
             </div>
         </div>
     );
 };
 
-export default Profile;
+export default CitizenDashboard;

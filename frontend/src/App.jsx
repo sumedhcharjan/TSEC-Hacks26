@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthProvider';
@@ -8,6 +7,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import CitizenDashboard from './pages/citizen/Dashboard';
 import AdminIssues from './pages/admin/AdminIssues';
 import IssueDetails from './pages/admin/IssueDetails';
+import ReportIssue from './pages/citizen/ReportIssue';
 import LogoutButton from './components/LogoutButton';
 
 // Protected Route Wrapper
@@ -86,6 +86,14 @@ function App() {
                             element={
                                 <ProtectedRoute>
                                     {role === 'admin' ? <IssueDetails /> : <Navigate to="/dashboard" />}
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/report/new"
+                            element={
+                                <ProtectedRoute>
+                                    <ReportIssue />
                                 </ProtectedRoute>
                             }
                         />

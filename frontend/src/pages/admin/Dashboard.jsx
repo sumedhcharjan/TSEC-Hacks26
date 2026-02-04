@@ -1,13 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import api from '../../services/api';
+import toast, { Toaster } from 'react-hot-toast';
 
 const AdminDashboard = () => {
-    // Mock data for the hackathon demo
-    const mockReports = [
-        { id: 1, type: 'Pothole', location: 'Main St & 5th Ave', risk: 85, status: 'Pending', date: '2023-10-27' },
-        { id: 2, type: 'Broken Streetlight', location: 'Elm Park', risk: 45, status: 'In Progress', date: '2023-10-26' },
-        { id: 3, type: 'Garbage Pile', location: 'Market Square', risk: 60, status: 'Pending', date: '2023-10-27' },
-        { id: 4, type: 'Fallen Tree', location: 'Riverside Dr', risk: 92, status: 'Resolved', date: '2023-10-25' },
-    ];
+    const [reports, setReports] = useState([]);
+    const [stats, setStats] = useState({ total: 0, pending: 0, resolved: 0, inProgress: 0 });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchReports();
+        fetchStats();
+    }, []);
+
+    const fetchReports = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get('/admin/reports');
+            setReports(response.data);
+        } catch (error) {
+            console.error('Failed to fetch reports:', error);
+            toast.error('Failed to load reports');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchStats = async () => {
+        try {
+            const response = await api.get('/admin/stats');
+            setStats(response.data);
+        } catch (error) {
+            console.error('Failed to fetch stats:', error);
+        }
+    };
+
+    const handleStatusChange = async (reportId, newStatus) => {
+        try {
+            await api.patch(`/admin/reports/${reportId}`, { status: newStatus });
+            toast.success('Status updated successfully!');
+            fetchReports(); // Refresh list
+            fetchStats(); // Refresh stats
+        } catch (error) {
+            console.error('Failed to update status:', error);
+            toast.error('Failed to update status');
+        }
+    };
 
     const getRiskColor = (risk) => {
         if (risk >= 80) return 'bg-danger/20 text-danger';
@@ -16,61 +53,112 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div className="space-y-6">
-            <header className="bg-surface shadow rounded-lg p-6">
-                <h1 className="text-3xl font-bold text-text-main">City Command Center</h1>
-                <p className="mt-2 text-sm text-text-muted">Overview of reported infrastructure issues</p>
-            </header>
+        <>
+            <Toaster position="top-center" />
+            <div className="space-y-6">
+                {/* Header */}
+                <header className="bg-surface shadow-lg rounded-xl p-6">
+                    <h1 className="text-3xl font-bold text-text-main">City Command Center</h1>
+                    <p className="mt-2 text-sm text-text-muted">Overview of reported infrastructure issues</p>
+                </header>
 
-            <div className="bg-surface shadow rounded-lg overflow-hidden">
-                <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">
-                        Incoming Reports
-                    </h3>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-surface p-6 rounded-xl shadow-sm border border-secondary/10">
+                        <p className="text-sm text-text-muted font-medium">Total Reports</p>
+                        <p className="text-3xl font-bold text-primary mt-1">{stats.total}</p>
+                    </div>
+                    <div className="bg-surface p-6 rounded-xl shadow-sm border border-secondary/10">
+                        <p className="text-sm text-text-muted font-medium">Pending</p>
+                        <p className="text-3xl font-bold text-accent mt-1">{stats.pending}</p>
+                    </div>
+                    <div className="bg-surface p-6 rounded-xl shadow-sm border border-secondary/10">
+                        <p className="text-sm text-text-muted font-medium">In Progress</p>
+                        <p className="text-3xl font-bold text-primary mt-1">{stats.inProgress}</p>
+                    </div>
+                    <div className="bg-surface p-6 rounded-xl shadow-sm border border-secondary/10">
+                        <p className="text-sm text-text-muted font-medium">Resolved</p>
+                        <p className="text-3xl font-bold text-success mt-1">{stats.resolved}</p>
+                    </div>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Issue Type
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Location
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    AI Risk Score
-                                </th>
-                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Status
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {mockReports.map((report) => (
-                                <tr key={report.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-gray-900">{report.type}</div>
-                                        <div className="text-sm text-gray-500">{report.date}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm text-gray-500">{report.location}</div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getRiskColor(report.risk)}`}>
-                                            {report.risk}/100
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {report.status}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+
+                {/* Reports Table */}
+                <div className="bg-surface shadow-lg rounded-xl overflow-hidden">
+                    <div className="px-6 py-4 border-b border-secondary/10">
+                        <h3 className="text-lg font-semibold text-text-main">
+                            All Reports
+                        </h3>
+                    </div>
+                    {loading ? (
+                        <div className="p-12 text-center">
+                            <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto"></div>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-secondary/10">
+                                <thead className="bg-background">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">
+                                            Category
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">
+                                            Reporter
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">
+                                            Location
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">
+                                            Risk Score
+                                        </th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-text-muted uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-surface divide-y divide-secondary/10">
+                                    {reports.map((report) => (
+                                        <tr key={report.id} className="hover:bg-background transition-colors">
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm font-medium text-text-main">{report.category}</div>
+                                                <div className="text-sm text-text-muted">
+                                                    {new Date(report.created_at).toLocaleDateString()}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-text-muted">
+                                                    {report.profiles?.email || 'Unknown'}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-text-muted">
+                                                    {report.latitude?.toFixed(4)}, {report.longitude?.toFixed(4)}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getRiskColor(report.risk_score)}`}>
+                                                    {report.risk_score}/100
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <select
+                                                    value={report.status}
+                                                    onChange={(e) => handleStatusChange(report.id, e.target.value)}
+                                                    className="text-sm border border-secondary/20 rounded-lg px-3 py-1 bg-surface focus:ring-2 focus:ring-primary outline-none"
+                                                >
+                                                    <option value="PENDING">Pending</option>
+                                                    <option value="IN_PROGRESS">In Progress</option>
+                                                    <option value="RESOLVED">Resolved</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
