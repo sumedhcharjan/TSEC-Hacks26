@@ -32,6 +32,7 @@ const AuthProvider = ({ children }) => {
     const value = {
         session,
         user,
+        role: user?.user_metadata?.role || null, 
         signOut: () => supabase.auth.signOut(),
     }
 

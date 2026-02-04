@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useAuth } from './context/AuthProvider';
 
 import Landing from './pages/Landing';
+import AdminDashboard from './pages/AdminDashboard';
 import Profile from './components/Profile';
 import LogoutButton from './components/LogoutButton';
 
@@ -15,7 +16,7 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
-    const { user } = useAuth();
+    const { user, role } = useAuth();
 
     return (
         <Router>
@@ -30,7 +31,16 @@ function App() {
                                 </span>
                             </div>
                             <div>
-                                {user && <LogoutButton />}
+                                {user && (
+                                    <div className="flex items-center space-x-4">
+                                        {role === 'admin' && (
+                                            <a href="/admin" className="text-indigo-600 hover:text-indigo-900 font-medium">
+                                                Admin Dashboard
+                                            </a>
+                                        )}
+                                        <LogoutButton />
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -45,6 +55,14 @@ function App() {
                             element={
                                 <ProtectedRoute>
                                     <Profile />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/admin"
+                            element={
+                                <ProtectedRoute>
+                                    {role === 'admin' ? <AdminDashboard /> : <Navigate to="/dashboard" />}
                                 </ProtectedRoute>
                             }
                         />

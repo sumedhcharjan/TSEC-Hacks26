@@ -14,6 +14,7 @@ const Profile = () => {
             .catch(console.error);
     }, []);
 
+    console.log(user);
     return (
         <div className="space-y-6">
             {/* Header Section */}
