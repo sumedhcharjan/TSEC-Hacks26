@@ -7,7 +7,7 @@ import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthProvider';
 
-// Fix Leaflet icon issue
+
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
@@ -123,8 +123,8 @@ const IssueDetails = () => {
                             <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
                                 <span className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Current Lifecycle Status</span>
                                 <span className={`block text-xl font-black ${issue.status === 'Open' ? 'text-blue-600' :
-                                        issue.status === 'In Progress' ? 'text-orange-600' :
-                                            issue.status === 'Resolved' ? 'text-green-600' : 'text-gray-900'
+                                    issue.status === 'In Progress' ? 'text-orange-600' :
+                                        issue.status === 'Resolved' ? 'text-green-600' : 'text-gray-900'
                                     }`}>{issue.status}</span>
                             </div>
                             <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
@@ -158,8 +158,8 @@ const IssueDetails = () => {
                                 {activeOrder.milestones?.map((step, idx) => (
                                     <div key={idx} className="flex gap-6 relative">
                                         <div className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-xs z-10 transition-all border-4 border-white ${step.status === 'completed' ? 'bg-green-500 text-white shadow-lg shadow-green-100' :
-                                                step.status === 'review' ? 'bg-orange-500 text-white animate-pulse' :
-                                                    'bg-gray-100 text-gray-400'
+                                            step.status === 'review' ? 'bg-orange-500 text-white animate-pulse' :
+                                                'bg-gray-100 text-gray-400'
                                             }`}>
                                             {step.status === 'completed' ? '✓' : idx + 1}
                                         </div>
@@ -170,6 +170,27 @@ const IssueDetails = () => {
                                                     {step.title}
                                                 </h4>
                                                 <p className="text-xs text-gray-500 mt-1 font-medium italic">{step.description}</p>
+
+                                                {step.evidence_url && (
+                                                    <div className="mt-4 group/img relative">
+                                                        <a
+                                                            href={step.evidence_url}
+                                                            target="_blank"
+                                                            rel="noreferrer"
+                                                            className="flex items-center gap-2 text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-100 transition-all w-fit"
+                                                        >
+                                                            <span>📸</span> VIEW FIELD EVIDENCE
+                                                        </a>
+                                                        <div className="hidden group-hover/img:block absolute top-10 left-0 z-[100] w-64 h-48 rounded-xl overflow-hidden border-4 border-white shadow-2xl animate-in fade-in zoom-in duration-200">
+                                                            <img
+                                                                src={step.evidence_url}
+                                                                alt="Field Evidence"
+                                                                className="w-full h-full object-cover"
+                                                                onError={(e) => e.target.style.display = 'none'}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {/* Admin Control */}

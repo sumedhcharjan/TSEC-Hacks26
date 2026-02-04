@@ -5,9 +5,7 @@ const { getExample } = require('../controllers/example.controller');
 
 // Stub middleware for auth verification (hackathon-safe)
 const checkAuth = (req, res, next) => {
-    // In a real app, verify Auth0 token here.
-    // For hackathon placeholder: assume if header exists, it's valid, or just pass through.
-    // Or just mock a user injection.
+  
     const authHeader = req.headers.authorization;
     if (!authHeader) {
      

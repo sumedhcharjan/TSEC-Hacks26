@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../../services/api';
+import { supabase } from '../../services/supabaseClient';
 import { useAuth } from '../../context/AuthProvider';
 import { Toaster, toast } from 'react-hot-toast';
 
@@ -7,47 +8,97 @@ const ContractorDashboard = () => {
     const { user } = useAuth();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isUploading, setIsUploading] = useState(false);
+    const [selectedMilestone, setSelectedMilestone] = useState(null); // { orderId, index }
+    const fileInputRef = useRef(null);
 
-    useEffect(() => {
-        const fetchDashboard = async () => {
-            try {
-                const response = await api.get('/contractor/dashboard', {
-                    headers: { 'user-id': user.id }
-                });
-                setStats(response.data);
-            } catch (error) {
-                console.error('Failed to fetch dashboard:', error);
-                toast.error('Failed to load dashboard data');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (user) fetchDashboard();
-    }, [user]);
-
-    const handleRequestVerification = async (orderId, milestoneIndex) => {
+    const fetchDashboard = async () => {
         try {
-            await api.post('/contractor/verify-milestone', { orderId, milestoneIndex });
-            toast.success('Verification request sent to admin');
-
-            // Refresh data
             const response = await api.get('/contractor/dashboard', {
                 headers: { 'user-id': user.id }
             });
             setStats(response.data);
         } catch (error) {
-            console.error('Verification request error:', error);
-            toast.error('Failed to send verification request');
+            console.error('Failed to fetch dashboard:', error);
+            toast.error('Failed to load dashboard data');
+        } finally {
+            setLoading(false);
         }
     };
 
-    if (loading) return <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">Loading dashboard...</div>;
+    useEffect(() => {
+        if (user) fetchDashboard();
+    }, [user]);
+
+    const handleFileSelect = async (e) => {
+        const file = e.target.files[0];
+        if (!file || !selectedMilestone) return;
+
+        setIsUploading(true);
+        const loadingToast = toast.loading('Uploading evidence to command center...');
+
+        try {
+            // 1. Upload to Supabase Storage - Bucket: TSEC26
+            const fileExt = file.name.split('.').pop();
+            const fileName = `evidence_${selectedMilestone.orderId}_${selectedMilestone.index}_${Date.now()}.${fileExt}`;
+            const filePath = `milestone-evidence/${fileName}`;
+
+            const { data, error: uploadError } = await supabase.storage
+                .from('TSEC26')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            // 2. Get Public URL
+            const { data: { publicUrl } } = supabase.storage
+                .from('TSEC26')
+                .getPublicUrl(filePath);
+
+            // 3. Send Verification Request to Backend
+            await api.post('/contractor/verify-milestone', {
+                orderId: selectedMilestone.orderId,
+                milestoneIndex: selectedMilestone.index,
+                imageUrl: publicUrl
+            });
+
+            toast.success('Evidence submitted! Verification requested.', { id: loadingToast });
+            fetchDashboard();
+        } catch (error) {
+            console.error('Verification request error:', error);
+            toast.error('Failed to upload evidence: ' + error.message, { id: loadingToast });
+        } finally {
+            setIsUploading(false);
+            setSelectedMilestone(null);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
+    const triggerUpload = (orderId, index) => {
+        setSelectedMilestone({ orderId, index });
+        fileInputRef.current.click();
+    };
+
+    if (loading) return <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
+        <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+            <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">Syncing Field Data...</p>
+        </div>
+    </div>;
+
     if (!stats) return <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">No data available</div>;
 
     return (
         <div className="min-h-screen bg-gray-900 text-white font-sans p-6">
             <Toaster position="top-right" />
+
+            {/* Hidden File Input */}
+            <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+                className="hidden"
+                accept="image/*"
+            />
 
             <header className="mb-10 border-b border-gray-800 pb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
@@ -156,15 +207,13 @@ const ContractorDashboard = () => {
                                             </div>
 
                                             <div className="relative">
-                                                {/* Connecting Line */}
                                                 <div className="absolute left-[13px] top-6 bottom-6 w-0.5 bg-gray-700 hidden sm:block"></div>
-
                                                 <div className="space-y-8">
                                                     {order.milestones?.map((step, idx) => (
                                                         <div key={idx} className="flex flex-col sm:flex-row gap-4 sm:gap-8 relative group">
                                                             {/* Milestone Marker */}
                                                             <div className={`w-7 h-7 rounded-full flex items-center justify-center font-black text-xs z-10 transition-all ${step.status === 'completed' ? 'bg-green-500 text-white shadow-[0_0_15px_rgba(34,197,94,0.3)]' :
-                                                                step.status === 'review' ? 'bg-yellow-500 text-white animate-pulse' : 'bg-gray-700 text-gray-400'
+                                                                    step.status === 'review' ? 'bg-yellow-500 text-white animate-pulse' : 'bg-gray-700 text-gray-400'
                                                                 }`}>
                                                                 {step.status === 'completed' ? '✓' : idx + 1}
                                                             </div>
@@ -174,7 +223,7 @@ const ContractorDashboard = () => {
                                                                     ? 'opacity-50 grayscale border-transparent'
                                                                     : 'hover:border-gray-600 border-transparent'
                                                                 }`}>
-                                                                <div>
+                                                                <div className="flex-1">
                                                                     <div className="flex items-center gap-2">
                                                                         <h4 className={`text-sm font-bold tracking-tight ${step.status === 'completed' ? 'text-gray-500 line-through decoration-2' : 'text-gray-200'}`}>
                                                                             {step.title}
@@ -184,29 +233,47 @@ const ContractorDashboard = () => {
                                                                         )}
                                                                     </div>
                                                                     <p className="text-[11px] text-gray-500 mt-1 max-w-xl">{step.description}</p>
+
+                                                                    {step.evidence_url && (
+                                                                        <a
+                                                                            href={step.evidence_url}
+                                                                            target="_blank"
+                                                                            rel="noreferrer"
+                                                                            className="inline-flex items-center gap-1.5 mt-3 text-[10px] font-black text-blue-400 bg-blue-400/10 px-2 py-1 rounded-md hover:bg-blue-400/20 transition-colors"
+                                                                        >
+                                                                            <span>🖼️</span> VIEW SUBMITTED EVIDENCE
+                                                                        </a>
+                                                                    )}
                                                                 </div>
 
                                                                 {/* Action for Milestone */}
                                                                 <div className="flex items-center gap-3 w-full md:w-auto">
                                                                     {step.status === 'pending' ? (
                                                                         <button
-                                                                            onClick={() => handleRequestVerification(order.id, idx)}
-                                                                            disabled={idx > 0 && order.milestones[idx - 1].status !== 'completed'}
-                                                                            className={`w-full md:w-auto px-4 py-2 text-[10px] font-black uppercase rounded-lg transition-all shadow-lg active:scale-95 ${(idx > 0 && order.milestones[idx - 1].status !== 'completed')
+                                                                            onClick={() => triggerUpload(order.id, idx)}
+                                                                            disabled={isUploading || (idx > 0 && order.milestones[idx - 1].status !== 'completed')}
+                                                                            className={`w-full md:w-auto px-5 py-2.5 text-[10px] font-black uppercase rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 ${(idx > 0 && order.milestones[idx - 1].status !== 'completed')
                                                                                     ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
                                                                                     : 'bg-blue-600 hover:bg-blue-500 text-white'
                                                                                 }`}
                                                                         >
-                                                                            {idx > 0 && order.milestones[idx - 1].status !== 'completed' ? 'Wait for Previous' : 'Request Review'}
+                                                                            {isUploading && selectedMilestone?.index === idx ? (
+                                                                                <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                                                            ) : (
+                                                                                <span>📸</span>
+                                                                            )}
+                                                                            {idx > 0 && order.milestones[idx - 1].status !== 'completed' ? 'Wait for Previous' : 'Request Review & Upload'}
                                                                         </button>
                                                                     ) : step.status === 'review' ? (
-                                                                        <span className="text-[10px] font-black uppercase text-yellow-500 bg-yellow-500/10 px-3 py-1.5 rounded-lg border border-yellow-500/20 w-full md:w-auto text-center">
+                                                                        <span className="text-[10px] font-black uppercase text-yellow-500 bg-yellow-500/10 px-4 py-2 rounded-xl border border-yellow-500/20 w-full md:w-auto text-center">
                                                                             Review In Progress
                                                                         </span>
                                                                     ) : (
-                                                                        <span className="text-[10px] font-black uppercase text-green-500 bg-green-500/10 px-3 py-1.5 rounded-lg border border-green-500/20 w-full md:w-auto text-center flex items-center justify-center gap-2">
-                                                                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Completed
-                                                                        </span>
+                                                                        <div className="flex flex-col items-center gap-1">
+                                                                            <span className="text-[10px] font-black uppercase text-green-500 bg-green-500/10 px-4 py-2 rounded-xl border border-green-500/20 w-full md:w-auto text-center flex items-center justify-center gap-2">
+                                                                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Completed
+                                                                            </span>
+                                                                        </div>
                                                                     )}
                                                                 </div>
                                                             </div>

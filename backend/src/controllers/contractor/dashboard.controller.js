@@ -78,7 +78,7 @@ const updateOrderStatus = async (req, res) => {
  */
 const requestMilestoneVerification = async (req, res) => {
     try {
-        const { orderId, milestoneIndex } = req.body;
+        const { orderId, milestoneIndex, imageUrl } = req.body;
 
         // 1. Fetch current order
         const { data: order, error: fetchError } = await supabase
@@ -92,8 +92,9 @@ const requestMilestoneVerification = async (req, res) => {
         const milestones = [...order.milestones];
         if (!milestones[milestoneIndex]) throw new Error('Milestone index out of bounds');
 
-        // 2. Update status to 'review'
+        // 2. Update status to 'review' and store image
         milestones[milestoneIndex].status = 'review';
+        milestones[milestoneIndex].evidence_url = imageUrl || null;
 
         const { error: updateError } = await supabase
             .from('work_orders')
@@ -102,7 +103,7 @@ const requestMilestoneVerification = async (req, res) => {
 
         if (updateError) throw updateError;
 
-        res.json({ success: true, message: 'Verification requested' });
+        res.json({ success: true, message: 'Verification requested with evidence' });
     } catch (error) {
         console.error('Error requesting verification:', error);
         res.status(500).json({ error: error.message });

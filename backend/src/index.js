@@ -22,10 +22,7 @@ app.use('/api/citizen', citizenRoutes);
 app.use('/api/contractor', require('./routes/contractor/index.routes'));
 app.use('/api/announcements', require('./routes/announcement.routes'));
 
-// Health Check
-
-// Start Server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
-// Backend restart trigger
+
