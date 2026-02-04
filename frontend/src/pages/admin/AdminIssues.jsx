@@ -83,12 +83,14 @@ const AdminIssues = () => {
                                         <div className="flex items-center">
                                             <div>
                                                 <div className="text-sm font-medium text-gray-900">{issue.category}</div>
-                                                <div className="text-xs text-gray-500">{issue.reportedBy}</div>
+                                                <div className="text-xs text-gray-500">
+                                                    {issue.profiles?.full_name || 'Anonymous'}
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="text-sm text-gray-900">{issue.latitude.toFixed(4)}, {issue.longitude.toFixed(4)}</div>
+                                        <div className="text-sm text-gray-900">{issue.latitude?.toFixed(4)}, {issue.longitude?.toFixed(4)}</div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getSeverityColor(issue.risk_score)}`}>
@@ -101,7 +103,7 @@ const AdminIssues = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {issue.created_at}
+                                        {new Date(issue.created_at).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button

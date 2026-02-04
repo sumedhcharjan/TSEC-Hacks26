@@ -56,7 +56,8 @@ const IssueDetails = () => {
             });
 
             if (response.data.success) {
-                setIssue(response.data.report);
+                // Update only the status field to preserve joined data like profiles
+                setIssue(prev => ({ ...prev, status: selectedStatus }));
                 toast.success(`Status updated to ${selectedStatus}`);
                 setIsModalOpen(false);
             }
@@ -148,11 +149,17 @@ const IssueDetails = () => {
                     {/* Image Card */}
                     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                         <div className="aspect-video w-full bg-gray-100 relative">
-                            <img
-                                src={issue.imageUrl}
-                                alt="Issue Evidence"
-                                className="w-full h-full object-cover"
-                            />
+                            {issue.image_url ? (
+                                <img
+                                    src={issue.image_url}
+                                    alt="Issue Evidence"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-gray-400">
+                                    No Image Available
+                                </div>
+                            )}
                         </div>
                         <div className="p-4 border-t border-gray-100 bg-gray-50">
                             <p className="text-xs text-gray-500 text-center">Attached Evidence Photo</p>

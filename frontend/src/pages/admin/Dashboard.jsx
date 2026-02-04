@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast, { Toaster } from 'react-hot-toast';
+import { ArrowRight } from 'lucide-react';
 
 const AdminDashboard = () => {
+    const navigate = useNavigate();
     const [reports, setReports] = useState([]);
     const [stats, setStats] = useState({ total: 0, pending: 0, resolved: 0, inProgress: 0 });
     const [loading, setLoading] = useState(true);
@@ -102,7 +105,7 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                         <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
@@ -133,6 +136,28 @@ const AdminDashboard = () => {
                                 <span className="text-xs text-text-light mt-2">Completed</span>
                             </div>
                         </div>
+                    </div>
+
+                    {/* Quick Actions / Emergency Finder */}
+                    <div className="bg-gradient-to-r from-primary to-primary-hover p-8 rounded-2xl shadow-xl border border-white/10 text-white relative overflow-hidden group">
+                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div>
+                                <h3 className="text-2xl font-bold mb-2 flex items-center gap-2">
+                                    🚑 Emergency Route Finder
+                                </h3>
+                                <p className="text-white/80 max-w-xl">
+                                    AI-powered route optimization for emergency services. Plan optimal paths by automatically avoiding current infrastructure incidents and congestion zones.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => navigate('/admin/emergency-routes')}
+                                className="whitespace-nowrap bg-white text-primary px-8 py-4 rounded-xl font-bold hover:bg-neutral-100 transition-all shadow-2xl flex items-center gap-2 group-hover:scale-105"
+                            >
+                                Launch Route Engine <ArrowRight size={18} />
+                            </button>
+                        </div>
+                        {/* Background flare */}
+                        <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform"></div>
                     </div>
 
                     {/* Category-Based Reports */}
