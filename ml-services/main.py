@@ -41,3 +41,10 @@ async def anomaly(file: UploadFile = File(...)):
     result = detect_anomaly(df)
 
     return result
+from services.forecasting import predict_future_demand
+from typing import List, Dict
+
+@app.post("/forecast-demand")
+async def forecast(data: List[Dict]):
+    result = predict_future_demand(data)
+    return result

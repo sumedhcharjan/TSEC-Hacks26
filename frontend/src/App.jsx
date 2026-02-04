@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { useAuth } from './context/AuthProvider';
 
 import Landing from './pages/Landing';
@@ -7,6 +7,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import CitizenDashboard from './pages/citizen/Dashboard';
 import AdminIssues from './pages/admin/AdminIssues';
 import IssueDetails from './pages/admin/IssueDetails';
+import ResourceOptimization from './pages/admin/ResourceOptimization';
 import ReportIssue from './pages/citizen/ReportIssue';
 import LogoutButton from './components/LogoutButton';
 
@@ -39,18 +40,21 @@ function App() {
                                 <div className="flex items-center space-x-4">
                                     {role === 'admin' && (
                                         <>
-                                            <a href="/admin" className="text-secondary hover:text-secondary-hover font-medium transition-colors">
+                                            <Link to="/admin" className="text-secondary hover:text-secondary-hover font-medium transition-colors">
                                                 Dashboard
-                                            </a>
-                                            <a href="/admin/issues" className="text-secondary hover:text-secondary-hover font-medium transition-colors">
+                                            </Link>
+                                            <Link to="/admin/issues" className="text-secondary hover:text-secondary-hover font-medium transition-colors">
                                                 Issues
-                                            </a>
+                                            </Link>
+                                            <Link to="/admin/optimization" className="text-secondary hover:text-secondary-hover font-medium transition-colors">
+                                                Optimization
+                                            </Link>
                                         </>
                                     )}
                                     {role === 'citizen' && (
-                                        <a href="/dashboard" className="text-secondary hover:text-secondary-hover font-medium transition-colors">
+                                        <Link to="/dashboard" className="text-secondary hover:text-secondary-hover font-medium transition-colors">
                                             My Dashboard
-                                        </a>
+                                        </Link>
                                     )}
                                     <LogoutButton />
                                 </div>
@@ -91,6 +95,14 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 {role === 'admin' ? <IssueDetails /> : <Navigate to="/dashboard" />}
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/optimization"
+                        element={
+                            <ProtectedRoute>
+                                {role === 'admin' ? <ResourceOptimization /> : <Navigate to="/dashboard" />}
                             </ProtectedRoute>
                         }
                     />
