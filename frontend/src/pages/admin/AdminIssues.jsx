@@ -1,61 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 
 const AdminIssues = () => {
     const navigate = useNavigate();
-    // Dummy Data for Issues
-    const [issues] = useState([
-        {
-            id: 1,
-            category: 'Pothole',
-            latitude: 40.7128,
-            longitude: -74.0060,
-            status: 'Open',
-            risk_score: 85,
-            created_at: '2023-10-27',
-            reportedBy: 'John Doe'
-        },
-        {
-            id: 2,
-            category: 'Water Leak',
-            latitude: 40.7138,
-            longitude: -74.0070,
-            status: 'In Progress',
-            risk_score: 95,
-            created_at: '2023-10-28',
-            reportedBy: 'Jane Smith'
-        },
-        {
-            id: 3,
-            category: 'Broken Streetlight',
-            latitude: 40.7118,
-            longitude: -74.0050,
-            status: 'Pending',
-            risk_score: 45,
-            created_at: '2023-10-26',
-            reportedBy: 'Mike Johnson'
-        },
-        {
-            id: 4,
-            category: 'Illegal Dumping',
-            latitude: 40.7148,
-            longitude: -74.0080,
-            status: 'Resolved',
-            risk_score: 20,
-            created_at: '2023-10-25',
-            reportedBy: 'Sarah Connor'
-        },
-        {
-            id: 5,
-            category: 'Bridge Crack',
-            latitude: 40.7158,
-            longitude: -74.0090,
-            status: 'Open',
-            risk_score: 92,
-            created_at: '2023-10-28',
-            reportedBy: 'Structural Sensor #402'
-        }
-    ]);
+    const [issues, setIssues] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchIssues = async () => {
+            try {
+                const response = await api.get('/admin/reports');
+                setIssues(response.data);
+            } catch (error) {
+                console.error('Error fetching issues:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchIssues();
+    }, []);
+
+    if (loading) return <div className="p-8 text-center text-gray-500">Loading issues...</div>;
 
     const getSeverityColor = (score) => {
         if (score >= 80) return 'bg-red-100 text-red-800 border-red-200';

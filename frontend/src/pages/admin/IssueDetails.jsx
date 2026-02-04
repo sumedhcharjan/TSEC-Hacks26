@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
+import toast from 'react-hot-toast';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -22,74 +24,18 @@ const IssueDetails = () => {
     const navigate = useNavigate();
     const [issue, setIssue] = useState(null);
 
-    // Dummy Data (Duplicated from AdminIssues for prototype simplicity)
-    const allIssues = [
-        {
-            id: 1,
-            category: 'Pothole',
-            latitude: 40.7128,
-            longitude: -74.0060,
-            description: 'Large pothole causing traffic slowdown. Reported by multiple drivers.',
-            status: 'Open',
-            risk_score: 85,
-            created_at: '2023-10-27',
-            reportedBy: 'John Doe',
-            imageUrl: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&q=80&w=400'
-        },
-        {
-            id: 2,
-            category: 'Water Leak',
-            latitude: 40.7138,
-            longitude: -74.0070,
-            description: 'Water gushing from a pipe near the fountain. Potential flooding risk.',
-            status: 'In Progress',
-            risk_score: 95,
-            created_at: '2023-10-28',
-            reportedBy: 'Jane Smith',
-            imageUrl: 'https://images.unsplash.com/photo-1583083527882-4bee9aba2eea?auto=format&fit=crop&q=80&w=400'
-        },
-        {
-            id: 3,
-            category: 'Broken Streetlight',
-            latitude: 40.7118,
-            longitude: -74.0050,
-            description: 'Streetlight flickering and then went out. Area is very dark at night.',
-            status: 'Pending',
-            risk_score: 45,
-            created_at: '2023-10-26',
-            reportedBy: 'Mike Johnson',
-            imageUrl: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&q=80&w=400'
-        },
-        {
-            id: 4,
-            category: 'Illegal Dumping',
-            latitude: 40.7148,
-            longitude: -74.0080,
-            description: 'Pile of construction debris on the sidewalk blocking pedestrian path.',
-            status: 'Resolved',
-            risk_score: 20,
-            created_at: '2023-10-25',
-            reportedBy: 'Sarah Connor',
-            imageUrl: 'https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&q=80&w=400'
-        },
-        {
-            id: 5,
-            category: 'Bridge Crack',
-            latitude: 40.7158,
-            longitude: -74.0090,
-            description: 'Visible hairline cracks on the support pillar observed during routine inspection.',
-            status: 'Open',
-            risk_score: 92,
-            created_at: '2023-10-28',
-            reportedBy: 'Structural Sensor #402',
-            imageUrl: 'https://images.unsplash.com/photo-1621251399464-9d2aa7a4a8f9?auto=format&fit=crop&q=80&w=400'
-        }
-    ];
-
     useEffect(() => {
-        // Simulate fetch
-        const foundIssue = allIssues.find(i => i.id === parseInt(id));
-        setIssue(foundIssue);
+        const fetchIssue = async () => {
+            try {
+                const response = await api.get(`/admin/reports/${id}`);
+                setIssue(response.data);
+            } catch (error) {
+                console.error('Error fetching issue details:', error);
+                toast.error('Failed to load issue details');
+            }
+        };
+
+        if (id) fetchIssue();
     }, [id]);
 
     const getSeverityColor = (score) => {
@@ -101,17 +47,23 @@ const IssueDetails = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState('');
 
-    const handleUpdateStatus = () => {
+    const handleUpdateStatus = async () => {
         if (!selectedStatus) return;
 
-        // Optimistic UI Update
-        const updatedIssue = { ...issue, status: selectedStatus };
-        setIssue(updatedIssue);
+        try {
+            const response = await api.patch(`/admin/reports/${id}`, {
+                status: selectedStatus
+            });
 
-        // TODO: Call backend to update status in Supabase
-        console.log(`Updating status to: ${selectedStatus}`);
-
-        setIsModalOpen(false);
+            if (response.data.success) {
+                setIssue(response.data.report);
+                toast.success(`Status updated to ${selectedStatus}`);
+                setIsModalOpen(false);
+            }
+        } catch (error) {
+            console.error('Error updating status:', error);
+            toast.error('Failed to update status');
+        }
     };
 
     if (!issue) return <div className="p-8 text-center text-gray-500">Loading details...</div>;
@@ -150,8 +102,8 @@ const IssueDetails = () => {
                             <div className="p-4 bg-gray-50 rounded-lg">
                                 <span className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</span>
                                 <span className={`block text-lg font-medium mt-1 ${issue.status === 'Open' ? 'text-blue-600' :
-                                        issue.status === 'In Progress' ? 'text-purple-600' :
-                                            issue.status === 'Resolved' ? 'text-green-600' : 'text-gray-600'
+                                    issue.status === 'In Progress' ? 'text-purple-600' :
+                                        issue.status === 'Resolved' ? 'text-green-600' : 'text-gray-600'
                                     }`}>{issue.status}</span>
                             </div>
                             <div className="p-4 bg-gray-50 rounded-lg">
