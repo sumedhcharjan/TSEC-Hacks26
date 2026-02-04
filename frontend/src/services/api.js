@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create a centralized Axios instance
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api', // Backend URL
+    baseURL: 'https://tsec-hacks26-ar9u.onrender.com/api', // Backend URL
     headers: {
         'Content-Type': 'application/json',
     },
