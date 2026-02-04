@@ -65,60 +65,6 @@ function App() {
                 )}
 
                 {/* Main Content Area */}
-                <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <Routes>
-                        <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Landing />} />
-                        <Route
-                            path="/dashboard"
-                            element={
-                                <ProtectedRoute>
-                                    <CitizenDashboard />
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/admin"
-                            element={
-                                <ProtectedRoute>
-                                    {role === 'admin' ? <AdminDashboard /> : <Navigate to="/dashboard" />}
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/admin/issues"
-                            element={
-                                <ProtectedRoute>
-                                    {role === 'admin' ? <AdminIssues /> : <Navigate to="/dashboard" />}
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/admin/issues/:id"
-                            element={
-                                <ProtectedRoute>
-                                    {role === 'admin' ? <IssueDetails /> : <Navigate to="/dashboard" />}
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/admin/emergency-routes"
-                            element={
-                                <ProtectedRoute>
-                                    {role === 'admin' ? <EmergencyRoutes /> : <Navigate to="/dashboard" />}
-                                </ProtectedRoute>
-                            }
-                        />
-                        <Route
-                            path="/report/new"
-                            element={
-                                <ProtectedRoute>
-                                    <ReportIssue />
-                                </ProtectedRoute>
-                            }
-                        />
-                    </Routes>
-                </main>
-                {/* Main Content Area - No wrapper constraints */}
                 <Routes>
                     <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Landing />} />
                     <Route
@@ -158,6 +104,14 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 {role === 'admin' ? <ResourceOptimization /> : <Navigate to="/dashboard" />}
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/emergency-routes"
+                        element={
+                            <ProtectedRoute>
+                                {role === 'admin' ? <EmergencyRoutes /> : <Navigate to="/dashboard" />}
                             </ProtectedRoute>
                         }
                     />
