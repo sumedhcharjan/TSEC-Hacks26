@@ -6,6 +6,7 @@ import { useAuth } from './context/AuthProvider';
 import Landing from './pages/Landing';
 import AdminDashboard from './pages/admin/Dashboard';
 import CitizenDashboard from './pages/citizen/Dashboard';
+import ReportIssue from './pages/citizen/ReportIssue';
 import LogoutButton from './components/LogoutButton';
 
 // Protected Route Wrapper
@@ -63,6 +64,14 @@ function App() {
                             element={
                                 <ProtectedRoute>
                                     {role === 'admin' ? <AdminDashboard /> : <Navigate to="/dashboard" />}
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/report/new"
+                            element={
+                                <ProtectedRoute>
+                                    <ReportIssue />
                                 </ProtectedRoute>
                             }
                         />

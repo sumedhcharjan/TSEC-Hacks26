@@ -4,7 +4,7 @@ import LoginButton from '../components/LoginButton';
 
 const Landing = () => {
     return (
-        <div className="flex flex-col md:flex-row items-center justify-center gap-12 min-h-[80vh] py-12">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-12 min-h-[80vh] py-12 animate-fadeIn">
             {/* Left Side: Hero Text */}
             <div className="flex-1 text-center md:text-left space-y-6 max-w-2xl">
                 <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-text-main leading-tight">
@@ -40,7 +40,7 @@ const Landing = () => {
             </div>
 
             {/* Right Side: Login Form */}
-            <div className="flex-1 flex justify-center w-full max-w-md">
+            <div className="flex-1 flex justify-center w-full max-w-md transform hover:scale-105 transition-transform duration-300">
                 <LoginButton />
             </div>
         </div>

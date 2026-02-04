@@ -1,8 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const reportsController = require('../../controllers/citizen/reports.controller');
+const { createReport, getReports, getUserReports, upload } = require('../../controllers/citizen/reports.controller');
 
-// POST /api/citizen/reports
-router.post('/reports', reportsController.createReport);
+// GET all reports
+router.get('/', getReports);
+
+// GET reports for specific user
+router.get('/user/:user_id', getUserReports);
+
+// POST create report (with image upload)
+router.post('/', upload.single('image'), createReport);
 
 module.exports = router;
