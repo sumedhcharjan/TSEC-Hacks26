@@ -22,15 +22,12 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         fetchData();
-        // Poll every 5 seconds for real-time updates (faster than 30s)
         const interval = setInterval(fetchData, 5000);
         return () => clearInterval(interval);
     }, []);
 
     const fetchData = async () => {
         try {
-            // Parallel fetch for valid Dashboard performance
-            // Also fetch latest announcements if needed, but for Admin Dash main view, we focus on stats/map
             const [reportsRes, statsRes] = await Promise.all([
                 api.get('/admin/reports'),
                 api.get('/admin/stats')
@@ -39,8 +36,6 @@ const AdminDashboard = () => {
             const reportsData = reportsRes.data || [];
             const statsData = statsRes.data || {};
 
-            // Map Backend Reports to Hazard Map Format
-            // CRITICAL FIX: Filter out reports with missing location data to prevent Map crash
             const mappedHazards = reportsData
                 .filter(report => report.latitude && report.longitude)
                 .map(report => ({
@@ -55,11 +50,6 @@ const AdminDashboard = () => {
 
             setHazards(mappedHazards);
 
-            // Map Backend Stats to DashboardStats Format
-            // Backend sends: { total, pending, resolved, inProgress }
-            // DashboardStats expects: { active, critical, pending, resolvedToday }
-            // We'll calculate derived stats where needed
-
             const criticalCount = reportsData.filter(r => (r.risk_score || 0) >= 70 && r.status !== 'RESOLVED').length;
             const today = new Date().toISOString().split('T')[0];
             const resolvedTodayCount = reportsData.filter(r => r.status === 'RESOLVED' && r.created_at.startsWith(today)).length;
@@ -72,190 +62,202 @@ const AdminDashboard = () => {
             });
 
             setLoading(false);
-
         } catch (error) {
             console.error('Failed to fetch dashboard data:', error);
-            if (!loading) toast.error('Connection lost. Retrying...');
+            if (!loading) toast.error('Operational sync failed. Retrying...');
         }
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 text-white font-sans">
-            <Toaster position="top-right" toastOptions={{ style: { background: '#333', color: '#fff' } }} />
+        <div className="min-h-screen pb-20">
+            <Toaster position="top-right" />
 
-            {/* Dashboard Actions Header - Integrated below global nav */}
-            <div className="bg-gray-800 border-b border-gray-700 py-4 px-6 mb-6">
-                <div className="max-w-[1600px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center flex-shrink-0">
-                            <span className="text-xl">📊</span>
+            {/* Professional Management Header */}
+            <div className="bg-white border-b border-border-subtle mb-10">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <div className="flex items-center gap-2 text-action font-black text-[10px] uppercase tracking-[0.2em] mb-2">
+                            <span className="w-2 h-2 rounded-full bg-action animate-pulse"></span>
+                            Operational Oversight
                         </div>
-                        <div>
-                            <h1 className="text-xl font-bold tracking-tight">
-                                Command <span className="text-blue-500">Center</span>
-                            </h1>
-                            <p className="text-xs text-gray-400">Live operational oversight & city management</p>
-                        </div>
+                        <h1 className="text-4xl font-black text-primary tracking-tight">
+                            Administration <span className="text-action">Dashboard</span>
+                        </h1>
+                        <p className="text-text-muted font-medium mt-1 uppercase text-[10px] tracking-widest">Real-time city infrastructure control panel</p>
                     </div>
 
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <div className="flex items-center gap-4">
                         <button
                             onClick={() => setShowAnnouncementModal(true)}
-                            className="flex-1 sm:flex-none px-4 py-2 bg-purple-600 hover:bg-purple-500 text-sm font-bold rounded shadow-lg transition-all hover:scale-105 flex items-center justify-center gap-2"
+                            className="bg-primary text-white px-6 py-4 rounded-2xl font-bold tracking-tight shadow-xl shadow-primary/20 hover:bg-primary/90 hover:-translate-y-1 transition-all flex items-center gap-2"
                         >
-                            <span>📢</span> Post Announcement
+                            <span>📢</span> Post Public Notice
                         </button>
                         <button
                             onClick={() => { setLoading(true); fetchData(); }}
-                            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-sm font-semibold rounded transition-colors flex items-center gap-2"
+                            className="p-4 bg-white border border-border-subtle rounded-2xl hover:bg-gray-50 transition-all text-text-muted"
+                            title="Sync Data"
                         >
-                            <span>⟳</span> Refresh
+                            <svg className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
                         </button>
-                        <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-gray-900/50 border border-gray-700 rounded-lg text-[10px] uppercase tracking-wider">
-                            <span className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-500' : 'bg-green-500'} animate-pulse`}></span>
-                            <span className="text-gray-400">{loading ? 'Syncing' : 'Live'}</span>
-                        </div>
                     </div>
                 </div>
             </div>
 
             {/* Announcement Modal */}
             {showAnnouncementModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
-                    <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 w-full max-w-md shadow-2xl">
-                        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                            <span>📢</span> Create Announcement
-                        </h2>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-primary/20 backdrop-blur-md p-6">
+                    <div className="civic-card p-10 w-full max-w-lg shadow-2xl relative">
+                        <button
+                            onClick={() => setShowAnnouncementModal(false)}
+                            className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-xl transition-colors text-text-muted"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
 
-                        <div className="space-y-4">
+                        <div className="flex items-center gap-4 mb-8">
+                            <div className="w-12 h-12 bg-accent-soft rounded-2xl flex items-center justify-center text-2xl">📢</div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Category</label>
+                                <h2 className="text-2xl font-black text-primary tracking-tight">Public Notice</h2>
+                                <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Broadcast to all citizen portals</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div>
+                                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Notice Tier</label>
                                 <select
                                     value={announcementForm.category}
                                     onChange={(e) => setAnnouncementForm({ ...announcementForm, category: e.target.value })}
-                                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white focus:ring-2 focus:ring-purple-500 outline-none"
+                                    className="w-full bg-gray-50 border border-border-subtle rounded-xl px-4 py-3 font-bold text-primary focus:ring-4 focus:ring-action/10 outline-none transition-all"
                                 >
-                                    <option value="General">General</option>
-                                    <option value="Critical">Critical (Red)</option>
-                                    <option value="Utility">Utility (Yellow)</option>
-                                    <option value="Event">Event</option>
+                                    <option value="General">General Information</option>
+                                    <option value="Critical">Critical Alert (High Priority)</option>
+                                    <option value="Utility">Utility Update</option>
+                                    <option value="Event">Municipal Event</option>
                                 </select>
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Title</label>
+                                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Subject Header</label>
                                 <input
                                     type="text"
                                     value={announcementForm.title}
                                     onChange={(e) => setAnnouncementForm({ ...announcementForm, title: e.target.value })}
-                                    placeholder="e.g. Water Cut Notice"
-                                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white placeholder-gray-600 focus:ring-2 focus:ring-purple-500 outline-none"
+                                    placeholder="Brief descriptive title..."
+                                    className="w-full bg-gray-50 border border-border-subtle rounded-xl px-4 py-3 font-bold text-primary focus:ring-4 focus:ring-action/10 outline-none transition-all placeholder:font-medium"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-400 mb-1">Message</label>
+                                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2">Broadcast Message</label>
                                 <textarea
                                     value={announcementForm.message}
                                     onChange={(e) => setAnnouncementForm({ ...announcementForm, message: e.target.value })}
-                                    placeholder="Enter the full announcement details..."
+                                    placeholder="Detailed information for the public..."
                                     rows="4"
-                                    className="w-full bg-gray-900 border border-gray-700 rounded p-2 text-white placeholder-gray-600 focus:ring-2 focus:ring-purple-500 outline-none resize-none"
+                                    className="w-full bg-gray-50 border border-border-subtle rounded-xl px-4 py-3 font-bold text-primary focus:ring-4 focus:ring-action/10 outline-none transition-all placeholder:font-medium resize-none"
                                 />
                             </div>
                         </div>
 
-                        <div className="flex justify-end gap-3 mt-6">
-                            <button
-                                onClick={() => setShowAnnouncementModal(false)}
-                                className="px-4 py-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded transition-colors"
-                            >
-                                Cancel
-                            </button>
+                        <div className="flex justify-end gap-3 mt-10">
                             <button
                                 onClick={async () => {
-                                    if (!announcementForm.title || !announcementForm.message) return toast.error('Please fill all fields');
+                                    if (!announcementForm.title || !announcementForm.message) return toast.error('Verification failure: missing fields');
                                     try {
                                         await api.post('/announcements', announcementForm);
-                                        toast.success('Announcement Posted!');
+                                        toast.success('Broadcast transmitted successfully.');
                                         setShowAnnouncementModal(false);
                                         setAnnouncementForm({ title: '', message: '', category: 'General' });
                                     } catch (e) {
-                                        toast.error('Failed to post');
+                                        toast.error('Transmission failure.');
                                     }
                                 }}
-                                className="px-6 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded shadow-lg transition-transform hover:scale-105"
+                                className="w-full py-4 bg-action text-white font-black text-[11px] uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-action/20 hover:bg-action/90 transition-all active:scale-[0.98]"
                             >
-                                Post Live
+                                Dispatch Notice
                             </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            <main className="p-6 max-w-[1600px] mx-auto space-y-6">
+            <main className="px-6 lg:px-8 max-w-7xl mx-auto space-y-12 pb-20">
                 <DashboardStats stats={stats} />
 
-                {/* Quick Actions / Emergency Finder */}
-                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 rounded-2xl shadow-xl border border-white/10 text-white relative overflow-hidden group">
-                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div>
-                            <h3 className="text-2xl font-bold mb-2 flex items-center gap-2">
-                                🚑 Emergency Route Finder
+                {/* Professional Action Banner - Softened dominance */}
+                <div className="bg-primary/95 backdrop-blur-sm p-12 rounded-[40px] shadow-2xl shadow-primary/10 relative overflow-hidden group">
+                    <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
+                        <div className="max-w-3xl">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/10 mb-6">
+                                <span className="text-[9px] font-black text-white/80 uppercase tracking-[0.2em]">Strategic Infrastructure</span>
+                            </div>
+                            <h3 className="text-3xl font-black mb-4 text-white tracking-tight leading-tight">
+                                AI-Powered Emergency <br /> Route Optimization
                             </h3>
-                            <p className="text-white/80 max-w-2xl">
-                                AI-powered route optimization for emergency services. Plan optimal paths by automatically avoiding current infrastructure incidents and congestion zones in real-time.
+                            <p className="text-white/60 font-medium leading-relaxed max-w-2xl">
+                                Deploying advanced geospatial algorithms to synchronize emergency responder paths, navigating around infrastructure failure points in real-time.
                             </p>
                         </div>
                         <button
                             onClick={() => navigate('/admin/emergency-routes')}
-                            className="whitespace-nowrap bg-white text-blue-600 px-8 py-4 rounded-xl font-bold hover:bg-neutral-100 transition-all shadow-2xl flex items-center gap-2 group-hover:scale-105"
+                            className="whitespace-nowrap bg-white text-primary px-10 py-5 rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-gray-50 transition-all shadow-2xl flex items-center gap-3 group-hover:translate-x-1"
                         >
-                            Launch Route Engine <ArrowRight size={18} />
+                            Launch Route Engine <ArrowRight size={16} />
                         </button>
                     </div>
-                    {/* Background flare */}
-                    <div className="absolute -right-20 -bottom-20 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-110 transition-transform"></div>
+                    {/* Architectural Accent - Softened */}
+                    <div className="absolute -right-20 -bottom-20 w-80 h-80 bg-action/10 rounded-full blur-[100px] transition-transform duration-1000 group-hover:scale-150"></div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-220px)] min-h-[500px]">
-                    {/* Left Column: Map */}
-                    <div className="lg:col-span-2 flex flex-col bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-2xl relative group">
-                        <div className="absolute top-4 left-4 z-10 bg-black/60 backdrop-blur px-3 py-1 rounded text-xs font-mono text-blue-400 border border-blue-500/30">
-                            LIVE HAZARD FEED
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 h-[700px]">
+                    {/* Left: Tactical Map */}
+                    <div className="lg:col-span-8 civic-card p-4 h-full relative group overflow-hidden">
+                        <div className="absolute top-8 left-8 z-10 bg-white/90 backdrop-blur-md px-6 py-2.5 rounded-[14px] text-[9px] font-black text-primary border border-border-subtle shadow-2xl flex items-center gap-3">
+                            <span className="w-1.5 h-1.5 rounded-full bg-action animate-pulse shadow-[0_0_8px_rgba(30,111,217,0.5)]"></span>
+                            <span className="uppercase tracking-[0.3em]">Operational Tactical Map</span>
                         </div>
-                        <div className="flex-1 w-full h-full">
-                            <HazardMap hazards={hazards} />
-                        </div>
+                        <HazardMap hazards={hazards} />
                     </div>
 
-                    {/* Right Column: Recent Alerts / Feed */}
-                    <div className="bg-gray-800 rounded-xl border border-gray-700 flex flex-col shadow-xl">
-                        <div className="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-800/50">
-                            <h2 className="font-bold text-gray-200">Recent Alerts</h2>
-                            <span className="text-xs text-gray-400">{hazards.length} Total</span>
+                    {/* Right: Operational Feed */}
+                    <div className="lg:col-span-4 civic-card flex flex-col h-full max-h-[700px]">
+                        <div className="p-8 border-b border-border-subtle flex justify-between items-center bg-gray-50/50">
+                            <div>
+                                <h2 className="font-black text-primary tracking-tight">Incident Ledger</h2>
+                                <p className="text-[9px] font-black text-text-muted uppercase tracking-widest mt-1">Live Response Priority</p>
+                            </div>
+                            <span className="text-[10px] font-black text-action bg-accent-soft/50 px-3 py-1 rounded-full border border-action/5">{hazards.length} ACTIVE</span>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar" style={{ maxHeight: 'calc(700px - 90px)' }}>
                             {loading && hazards.length === 0 ? (
-                                <div className="text-center text-gray-500 py-10">Loading feed...</div>
+                                <div className="p-20 flex flex-col items-center justify-center gap-4 text-center">
+                                    <div className="w-10 h-10 border-4 border-accent-soft border-t-action rounded-full animate-spin"></div>
+                                    <p className="text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Synchronizing Feed...</p>
+                                </div>
                             ) : (
                                 hazards.sort((a, b) => b.severity - a.severity).map((hazard) => (
-                                    <div key={hazard.id} className="p-3 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition-colors border-l-4 border-transparent hover:border-blue-500 group cursor-pointer">
-                                        <div className="flex justify-between items-start">
-                                            <h3 className="font-semibold text-sm text-gray-200 group-hover:text-white">{hazard.type}</h3>
-                                            <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${hazard.severity >= 70 ? 'bg-red-500/20 text-red-400' :
-                                                hazard.severity >= 50 ? 'bg-orange-500/20 text-orange-400' :
-                                                    'bg-blue-500/20 text-blue-400'
+                                    <div key={hazard.id} className="p-5 bg-gray-50 border border-border-subtle rounded-2xl hover:bg-white hover:border-action/20 hover:shadow-xl hover:shadow-action/5 transition-all group cursor-pointer">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <h3 className="font-black text-sm text-primary group-hover:text-action transition-colors">{hazard.type}</h3>
+                                            <span className={`text-[9px] px-2 py-1 rounded-lg font-black uppercase tracking-widest ${hazard.severity >= 70 ? 'bg-red-50 text-red-500 border border-red-100' :
+                                                hazard.severity >= 50 ? 'bg-orange-50 text-orange-500 border border-orange-100' :
+                                                    'bg-blue-50 text-action border border-blue-100'
                                                 }`}>
-                                                {hazard.severity}% Risk
+                                                {hazard.severity}% RISK
                                             </span>
                                         </div>
-                                        <div className="flex justify-between items-end mt-2">
-                                            <div className="text-xs text-gray-500">
-                                                <p>{new Date(hazard.reportedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                                                <p className="mt-0.5">{hazard.lat?.toFixed(4)}, {hazard.lng?.toFixed(4)}</p>
+                                        <div className="flex justify-between items-end">
+                                            <div className="text-[10px] font-bold text-text-muted space-y-1">
+                                                <p className="flex items-center gap-1">🕒 {new Date(hazard.reportedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                                <p className="flex items-center gap-1">📍 {hazard.lat?.toFixed(4)}, {hazard.lng?.toFixed(4)}</p>
                                             </div>
-                                            <span className="text-xs px-2 py-1 bg-gray-900 rounded text-gray-400 border border-gray-600">
+                                            <span className="text-[9px] font-black px-3 py-1.5 bg-white border border-border-subtle rounded-xl text-primary group-hover:border-action/20 transition-colors uppercase tracking-widest">
                                                 {hazard.status?.replace('_', ' ')}
                                             </span>
                                         </div>

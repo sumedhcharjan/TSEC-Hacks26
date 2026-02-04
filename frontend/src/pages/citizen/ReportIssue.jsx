@@ -35,12 +35,12 @@ const ReportIssue = () => {
     });
 
     const categories = [
-        { label: "Select Issue Category", value: "" },
-        { label: "Road Damage (Pothole/Crack)", value: "Road Damage" },
-        { label: "Broken Streetlight", value: "Streetlight" },
-        { label: "Water Leakage / Pipe Burst", value: "Water Leak" },
-        { label: "Garbage Accumulation", value: "Garbage" },
-        { label: "Fallen Tree / Hazard", value: "Hazard" },
+        { label: "Select Infrastructure Category", value: "" },
+        { label: "Road & Pavement Damage", value: "Road Damage" },
+        { label: "Public Lighting Failure", value: "Streetlight" },
+        { label: "Water & Sanitation Systems", value: "Water Leak" },
+        { label: "Waste Management Issues", value: "Garbage" },
+        { label: "Public Safety Hazards", value: "Hazard" },
     ];
 
     const LocationMarker = () => {
@@ -62,10 +62,10 @@ const ReportIssue = () => {
     const handleLocationDetect = () => {
         setFormData(prev => ({ ...prev, locationStatus: 'Detecting' }));
         if (!navigator.geolocation) {
-            toast.error("Geolocation is not supported by your browser");
+            toast.error("Geolocation services not supported by your browser.");
             return;
         }
-        const loadingToast = toast.loading('Detecting your location...');
+        const loadingToast = toast.loading('Synchronizing with GPS satellites...');
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 setFormData(prev => ({
@@ -74,10 +74,10 @@ const ReportIssue = () => {
                     longitude: position.coords.longitude,
                     locationStatus: 'Detected'
                 }));
-                toast.success('Location detected successfully!', { id: loadingToast });
+                toast.success('Geospatial fix established.', { id: loadingToast });
             },
             () => {
-                toast.error('Unable to retrieve your location', { id: loadingToast });
+                toast.error('Unable to establish GPS fix.', { id: loadingToast });
             }
         );
     };
@@ -110,15 +110,15 @@ const ReportIssue = () => {
             });
 
             if (response.status === 200 || response.status === 201) {
-                toast.success('Report submitted successfully! 🎉', {
+                toast.success('Official report submitted successfully.', {
                     duration: 3000,
-                    style: { background: '#10B981', color: 'white' }
+                    style: { background: '#0A2540', color: 'white' }
                 });
                 setTimeout(() => navigate('/dashboard'), 1500);
             }
         } catch (error) {
             console.error("Submission failed", error);
-            toast.error(error.response?.data?.message || 'Failed to submit report. Please try again.');
+            toast.error(error.response?.data?.message || 'Submission failure. Please verify connection.');
         } finally {
             setLoading(false);
         }
@@ -127,27 +127,43 @@ const ReportIssue = () => {
     return (
         <>
             <Toaster position="top-center" reverseOrder={false} />
-            <div className="min-h-screen bg-surface">
-                {/* Header */}
-                <div className="bg-primary text-white">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        <h1 className="text-3xl font-bold">Report Infrastructure Issue</h1>
-                        <p className="text-white/80 mt-2">Help us maintain better infrastructure by reporting issues in your area</p>
+            <div className="min-h-screen pb-20">
+                {/* Formal Header */}
+                <div className="bg-white border-b border-border-subtle mb-10">
+                    <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => navigate('/dashboard')}
+                                className="p-3 hover:bg-gray-100 rounded-xl transition-colors text-text-muted"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <div>
+                                <div className="flex items-center gap-2 text-action font-black text-[10px] uppercase tracking-[0.2em] mb-1">
+                                    Official Filing
+                                </div>
+                                <h1 className="text-3xl font-black text-primary tracking-tight">Report Infrastructure Issue</h1>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Location Section */}
-                        <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                            <div className="flex items-center gap-2 mb-4">
-                                <span className="text-2xl">📍</span>
-                                <h2 className="text-xl font-semibold text-text-main">Location Details</h2>
+                <div className="max-w-4xl mx-auto px-6 lg:px-8">
+                    <form onSubmit={handleSubmit} className="space-y-10">
+                        {/* Section 1: Geospatial Fix */}
+                        <div className="civic-card p-10">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-10 h-10 bg-accent-soft rounded-lg flex items-center justify-center text-xl">📍</div>
+                                <div>
+                                    <h2 className="text-xl font-black text-primary tracking-tight">Geospatial Fix</h2>
+                                    <p className="text-[11px] font-bold text-text-muted uppercase tracking-widest mt-0.5">Define incident location</p>
+                                </div>
                             </div>
-                            <p className="text-sm text-text-muted mb-6">Pin the exact location on the map or use your current location</p>
 
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="h-80 rounded-xl overflow-hidden border border-border">
+                            <div className="grid md:grid-cols-5 gap-10">
+                                <div className="md:col-span-3 h-64 rounded-2xl overflow-hidden border border-border-subtle shadow-inner relative z-0">
                                     <MapContainer
                                         center={[formData.latitude, formData.longitude]}
                                         zoom={13}
@@ -155,49 +171,49 @@ const ReportIssue = () => {
                                     >
                                         <TileLayer
                                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                            attribution='&copy; OpenStreetMap contributors'
+                                            attribution='&copy; OpenStreetMap'
                                         />
                                         <LocationMarker />
                                     </MapContainer>
                                 </div>
-                                <div className="space-y-4">
+                                <div className="md:col-span-2 space-y-6">
                                     <button
                                         type="button"
                                         onClick={handleLocationDetect}
-                                        className="w-full bg-accent text-secondary px-4 py-3 rounded-lg font-medium hover:bg-accent-light transition-colors flex items-center justify-center gap-2"
+                                        className="w-full bg-white text-action hover:bg-accent-soft px-6 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest border border-action/20 transition-all flex items-center justify-center gap-3"
                                     >
-                                        <span>📡</span>
-                                        Use Current Location
+                                        <span className="text-lg">📡</span>
+                                        Auto-Detect GPS
                                     </button>
-                                    <div className="bg-surface rounded-lg p-4">
-                                        <p className="text-xs font-medium text-text-muted mb-2">Coordinates</p>
-                                        <p className="text-sm font-mono text-text-main">
+                                    <div className="bg-gray-50 rounded-xl p-5 border border-border-subtle">
+                                        <p className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-2">Logged Coordinates</p>
+                                        <p className="text-sm font-mono font-bold text-primary">
                                             {formData.latitude.toFixed(6)}, {formData.longitude.toFixed(6)}
                                         </p>
                                     </div>
-                                    <div className="bg-accent-light rounded-lg p-4 border border-secondary/20">
-                                        <p className="text-xs text-secondary font-medium">💡 Tip</p>
-                                        <p className="text-xs text-text-muted mt-1">
-                                            Click anywhere on the map to set the exact location of the issue
-                                        </p>
-                                    </div>
+                                    <p className="text-[11px] text-text-muted leading-relaxed italic">
+                                        Tip: You can manually adjust the pin by clicking anywhere on the tactical map view.
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Issue Details Section */}
-                        <div className="bg-white rounded-xl shadow-sm border border-border p-6">
-                            <div className="flex items-center gap-2 mb-4">
-                                <span className="text-2xl">📝</span>
-                                <h2 className="text-xl font-semibold text-text-main">Issue Details</h2>
+                        {/* Section 2: Technical Description */}
+                        <div className="civic-card p-10">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-10 h-10 bg-accent-soft rounded-lg flex items-center justify-center text-xl">📝</div>
+                                <div>
+                                    <h2 className="text-xl font-black text-primary tracking-tight">Technical Description</h2>
+                                    <p className="text-[11px] font-bold text-text-muted uppercase tracking-widest mt-0.5">Specify incident parameters</p>
+                                </div>
                             </div>
 
-                            <div className="space-y-6">
+                            <div className="space-y-8">
                                 <div>
-                                    <label className="block text-sm font-medium text-text-main mb-2">Category *</label>
+                                    <label className="block text-[11px] font-black text-text-muted uppercase tracking-widest mb-3">Service Category</label>
                                     <select
                                         required
-                                        className="w-full px-4 py-3 bg-white border border-border rounded-lg focus:ring-2 focus:ring-secondary focus:border-secondary outline-none transition-colors"
+                                        className="w-full px-6 py-4 bg-gray-50 border border-border-subtle rounded-xl focus:ring-4 focus:ring-action/10 focus:border-action outline-none transition-all font-bold text-primary"
                                         value={formData.category}
                                         onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                     >
@@ -208,38 +224,40 @@ const ReportIssue = () => {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-text-main mb-2">Description *</label>
+                                    <label className="block text-[11px] font-black text-text-muted uppercase tracking-widest mb-3">Observation Details</label>
                                     <textarea
                                         required
                                         rows="4"
-                                        placeholder="Please describe the issue in detail..."
-                                        className="w-full px-4 py-3 bg-white border border-border rounded-lg focus:ring-2 focus:ring-secondary focus:border-secondary outline-none transition-colors resize-none"
+                                        placeholder="Please provide a concise, factual description of the infrastructure failure..."
+                                        className="w-full px-6 py-4 bg-gray-50 border border-border-subtle rounded-xl focus:ring-4 focus:ring-action/10 focus:border-action outline-none transition-all font-bold text-primary resize-none placeholder:font-medium"
                                         value={formData.description}
                                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-text-main mb-2">Photo Evidence</label>
-                                    <div className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-secondary hover:bg-accent transition-all relative">
+                                    <label className="block text-[11px] font-black text-text-muted uppercase tracking-widest mb-3">Visual Evidence</label>
+                                    <div className="border-2 border-dashed border-border-subtle rounded-[20px] p-10 text-center cursor-pointer hover:border-action hover:bg-accent-soft transition-all relative group overflow-hidden">
                                         <input
                                             type="file"
                                             accept="image/*"
                                             onChange={handleFileChange}
-                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                         />
                                         {preview ? (
-                                            <div className="space-y-2">
-                                                <img src={preview} alt="Preview" className="h-40 mx-auto rounded-lg object-cover" />
-                                                <p className="text-sm text-text-muted">Click to change photo</p>
+                                            <div className="space-y-4">
+                                                <img src={preview} alt="Evidence Preview" className="h-48 mx-auto rounded-xl object-cover shadow-lg border-2 border-white" />
+                                                <p className="text-[10px] font-black text-action uppercase tracking-widest">Click to change tactical photo</p>
                                             </div>
                                         ) : (
-                                            <div>
-                                                <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <div className="space-y-4">
+                                                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-sm group-hover:scale-110 transition-transform">
                                                     <span className="text-3xl">📸</span>
                                                 </div>
-                                                <p className="text-sm font-medium text-text-main">Upload a photo</p>
-                                                <p className="text-xs text-text-muted mt-1">PNG, JPG up to 10MB</p>
+                                                <div>
+                                                    <p className="text-sm font-black text-primary uppercase tracking-tight">Capture Evidence</p>
+                                                    <p className="text-[11px] text-text-muted font-medium mt-1">Accepts high-resolution JPG/PNG formats</p>
+                                                </div>
                                             </div>
                                         )}
                                     </div>
@@ -247,21 +265,26 @@ const ReportIssue = () => {
                             </div>
                         </div>
 
-                        {/* Submit Button */}
-                        <div className="flex gap-4">
+                        {/* Final Action */}
+                        <div className="flex flex-col sm:flex-row gap-6 pt-4">
                             <button
                                 type="button"
                                 onClick={() => navigate('/dashboard')}
-                                className="flex-1 bg-white text-text-main px-8 py-4 rounded-lg font-semibold border border-border hover:bg-surface transition-colors"
+                                className="sm:w-1/3 bg-white text-text-muted px-8 py-5 rounded-2xl font-black text-[11px] uppercase tracking-widest border border-border-subtle hover:bg-gray-50 transition-all"
                             >
-                                Cancel
+                                Abandon Draft
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1 bg-secondary hover:bg-secondary-hover text-white px-8 py-4 rounded-lg font-semibold shadow-sm transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                                className="flex-1 bg-action text-white px-8 py-5 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-action/20 hover:bg-action/90 hover:-translate-y-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                             >
-                                {loading ? 'Submitting Report...' : 'Submit Report'}
+                                {loading ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                        Submitting to City Hub...
+                                    </>
+                                ) : 'Transmit Official Report'}
                             </button>
                         </div>
                     </form>

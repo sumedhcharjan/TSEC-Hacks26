@@ -213,200 +213,212 @@ const EmergencyRoutes = () => {
     };
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <h1 className="text-2xl font-bold text-gray-900">Emergency Route Finder</h1>
-                <p className="text-sm text-gray-500 mt-1">Plan optimal routes avoiding infrastructure incidents</p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                {/* Control Panel */}
-                <div className="lg:col-span-1 space-y-4">
-                    {/* Origin Selection */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                        <h3 className="font-semibold text-gray-900 mb-3">Origin</h3>
-                        <button
-                            onClick={handleUseCurrentLocation}
-                            className="w-full py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium mb-2"
-                        >
-                            📍 Use Current Location
-                        </button>
-                        <button
-                            onClick={() => setSelectionMode('origin')}
-                            className={`w-full py-2 px-4 rounded-lg transition-colors font-medium ${selectionMode === 'origin'
-                                ? 'bg-primary text-white'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                        >
-                            {selectionMode === 'origin' ? 'Click Map to Set' : 'Set on Map'}
-                        </button>
-                        {origin && (
-                            <p className="text-xs text-gray-500 mt-2">
-                                {origin.lat.toFixed(4)}, {origin.lng.toFixed(4)}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Destination Selection */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                        <h3 className="font-semibold text-gray-900 mb-3">Destination</h3>
-                        <button
-                            onClick={() => setSelectionMode('destination')}
-                            className={`w-full py-2 px-4 rounded-lg transition-colors font-medium ${selectionMode === 'destination'
-                                ? 'bg-primary text-white'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                        >
-                            {selectionMode === 'destination' ? 'Click Map to Set' : 'Set on Map'}
-                        </button>
-                        {destination && (
-                            <p className="text-xs text-gray-500 mt-2">
-                                {destination.lat.toFixed(4)}, {destination.lng.toFixed(4)}
-                            </p>
-                        )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-2">
-                        <button
-                            onClick={calculateRoute}
-                            disabled={!origin || !destination || loading}
-                            className="w-full py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? 'Calculating...' : '🚑 Calculate Route'}
-                        </button>
-                        <button
-                            onClick={clearRoute}
-                            className="w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
-                        >
-                            Clear All
-                        </button>
-                    </div>
-
-                    {/* Route Info */}
-                    {route && (
-                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                            <h3 className="font-semibold text-gray-900 mb-2">Route Info</h3>
-                            <div className="space-y-1 text-sm">
-                                <p className="text-gray-600">Distance: <span className="font-medium text-gray-900">{route.distance} km</span></p>
-                                <p className="text-gray-600">Duration: <span className="font-medium text-gray-900">~{route.duration} min</span></p>
-                            </div>
+        <div className="min-h-screen pb-20">
+            {/* Professional Sub-Header */}
+            <div className="bg-white border-b border-border-subtle mb-10">
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
+                    <div>
+                        <div className="flex items-center gap-2 text-action font-black text-[10px] uppercase tracking-[0.2em] mb-1">
+                            <span className="w-2 h-2 rounded-full bg-action animate-pulse"></span>
+                            Strategic Route AI
                         </div>
-                    )}
-
-                    {/* Legend */}
-                    <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                        <h3 className="font-semibold text-gray-900 mb-2">Legend</h3>
-                        <div className="space-y-2 text-xs">
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                                <span>Origin</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                <span>Destination</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-red-500 border border-white"></div>
-                                <span>High Risk Incident</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-yellow-500 border border-white"></div>
-                                <span>Medium Risk</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-green-500 border border-white"></div>
-                                <span>Low Risk</span>
-                            </div>
-                        </div>
+                        <h1 className="text-4xl font-black text-primary tracking-tight">
+                            Emergency <span className="text-action">Navigation</span>
+                        </h1>
+                        <p className="text-text-muted font-medium mt-1 uppercase text-[10px] tracking-widest">Incident-aware geospatial optimization</p>
                     </div>
                 </div>
+            </div>
 
-                {/* Map */}
-                <div className="lg:col-span-3">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style={{ height: '700px' }}>
-                        <MapContainer
-                            center={mapCenter}
-                            zoom={13}
-                            style={{ height: '100%', width: '100%' }}
-                        >
-                            <TileLayer
-                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                            />
+            <div className="max-w-7xl mx-auto px-6 lg:px-8">
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+                    {/* Control Panel */}
+                    <div className="lg:col-span-1 space-y-4">
+                        {/* Origin Selection */}
+                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <h3 className="font-semibold text-gray-900 mb-3">Origin</h3>
+                            <button
+                                onClick={handleUseCurrentLocation}
+                                className="w-full py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-medium mb-2"
+                            >
+                                📍 Use Current Location
+                            </button>
+                            <button
+                                onClick={() => setSelectionMode('origin')}
+                                className={`w-full py-2 px-4 rounded-lg transition-colors font-medium ${selectionMode === 'origin'
+                                    ? 'bg-primary text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                            >
+                                {selectionMode === 'origin' ? 'Click Map to Set' : 'Set on Map'}
+                            </button>
+                            {origin && (
+                                <p className="text-xs text-gray-500 mt-2">
+                                    {origin.lat.toFixed(4)}, {origin.lng.toFixed(4)}
+                                </p>
+                            )}
+                        </div>
 
-                            <MapClickHandler />
+                        {/* Destination Selection */}
+                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <h3 className="font-semibold text-gray-900 mb-3">Destination</h3>
+                            <button
+                                onClick={() => setSelectionMode('destination')}
+                                className={`w-full py-2 px-4 rounded-lg transition-colors font-medium ${selectionMode === 'destination'
+                                    ? 'bg-primary text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                            >
+                                {selectionMode === 'destination' ? 'Click Map to Set' : 'Set on Map'}
+                            </button>
+                            {destination && (
+                                <p className="text-xs text-gray-500 mt-2">
+                                    {destination.lat.toFixed(4)}, {destination.lng.toFixed(4)}
+                                </p>
+                            )}
+                        </div>
 
-                            {/* Traffic Zones */}
-                            {trafficZones.map(zone => (
-                                <Circle
-                                    key={zone.id}
-                                    center={zone.center}
-                                    radius={zone.radius}
-                                    pathOptions={{
-                                        color: zone.color,
-                                        fillColor: zone.color,
-                                        fillOpacity: zone.opacity,
-                                        weight: 1
-                                    }}
-                                >
-                                    <Popup>
-                                        <strong>{zone.name}</strong><br />
-                                        Severity: {zone.severity}
-                                    </Popup>
-                                </Circle>
-                            ))}
+                        {/* Actions */}
+                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 space-y-2">
+                            <button
+                                onClick={calculateRoute}
+                                disabled={!origin || !destination || loading}
+                                className="w-full py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loading ? 'Calculating...' : '🚑 Calculate Route'}
+                            </button>
+                            <button
+                                onClick={clearRoute}
+                                className="w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                            >
+                                Clear All
+                            </button>
+                        </div>
 
-                            {/* Incident Markers */}
-                            {incidents.map(incident => (
-                                incident.latitude && incident.longitude && (
+                        {/* Route Info */}
+                        {route && (
+                            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                                <h3 className="font-semibold text-gray-900 mb-2">Route Info</h3>
+                                <div className="space-y-1 text-sm">
+                                    <p className="text-gray-600">Distance: <span className="font-medium text-gray-900">{route.distance} km</span></p>
+                                    <p className="text-gray-600">Duration: <span className="font-medium text-gray-900">~{route.duration} min</span></p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Legend */}
+                        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <h3 className="font-semibold text-gray-900 mb-2">Legend</h3>
+                            <div className="space-y-2 text-xs">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                    <span>Origin</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <span>Destination</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-red-500 border border-white"></div>
+                                    <span>High Risk Incident</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-yellow-500 border border-white"></div>
+                                    <span>Medium Risk</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-green-500 border border-white"></div>
+                                    <span>Low Risk</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Map */}
+                    <div className="lg:col-span-3">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden" style={{ height: '700px' }}>
+                            <MapContainer
+                                center={mapCenter}
+                                zoom={13}
+                                style={{ height: '100%', width: '100%' }}
+                            >
+                                <TileLayer
+                                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                />
+
+                                <MapClickHandler />
+
+                                {/* Traffic Zones */}
+                                {trafficZones.map(zone => (
                                     <Circle
-                                        key={incident.id}
-                                        center={[incident.latitude, incident.longitude]}
-                                        radius={100}
+                                        key={zone.id}
+                                        center={zone.center}
+                                        radius={zone.radius}
                                         pathOptions={{
-                                            color: getIncidentColor(incident.risk_score),
-                                            fillColor: getIncidentColor(incident.risk_score),
-                                            fillOpacity: 0.5,
-                                            weight: 2
+                                            color: zone.color,
+                                            fillColor: zone.color,
+                                            fillOpacity: zone.opacity,
+                                            weight: 1
                                         }}
                                     >
                                         <Popup>
-                                            <strong>{incident.category}</strong><br />
-                                            Risk Score: {incident.risk_score}<br />
-                                            Status: {incident.status}
+                                            <strong>{zone.name}</strong><br />
+                                            Severity: {zone.severity}
                                         </Popup>
                                     </Circle>
-                                )
-                            ))}
+                                ))}
 
-                            {/* Origin Marker */}
-                            {origin && (
-                                <Marker position={[origin.lat, origin.lng]} icon={originIcon}>
-                                    <Popup>Origin</Popup>
-                                </Marker>
-                            )}
+                                {/* Incident Markers */}
+                                {incidents.map(incident => (
+                                    incident.latitude && incident.longitude && (
+                                        <Circle
+                                            key={incident.id}
+                                            center={[incident.latitude, incident.longitude]}
+                                            radius={100}
+                                            pathOptions={{
+                                                color: getIncidentColor(incident.risk_score),
+                                                fillColor: getIncidentColor(incident.risk_score),
+                                                fillOpacity: 0.5,
+                                                weight: 2
+                                            }}
+                                        >
+                                            <Popup>
+                                                <strong>{incident.category}</strong><br />
+                                                Risk Score: {incident.risk_score}<br />
+                                                Status: {incident.status}
+                                            </Popup>
+                                        </Circle>
+                                    )
+                                ))}
 
-                            {/* Destination Marker */}
-                            {destination && (
-                                <Marker position={[destination.lat, destination.lng]} icon={destinationIcon}>
-                                    <Popup>Destination</Popup>
-                                </Marker>
-                            )}
+                                {/* Origin Marker */}
+                                {origin && (
+                                    <Marker position={[origin.lat, origin.lng]} icon={originIcon}>
+                                        <Popup>Origin</Popup>
+                                    </Marker>
+                                )}
 
-                            {/* Route Polyline */}
-                            {route && (
-                                <Polyline
-                                    positions={route.coordinates}
-                                    pathOptions={{
-                                        color: '#3b82f6',
-                                        weight: 4,
-                                        opacity: 0.7
-                                    }}
-                                />
-                            )}
-                        </MapContainer>
+                                {/* Destination Marker */}
+                                {destination && (
+                                    <Marker position={[destination.lat, destination.lng]} icon={destinationIcon}>
+                                        <Popup>Destination</Popup>
+                                    </Marker>
+                                )}
+
+                                {/* Route Polyline */}
+                                {route && (
+                                    <Polyline
+                                        positions={route.coordinates}
+                                        pathOptions={{
+                                            color: '#3b82f6',
+                                            weight: 4,
+                                            opacity: 0.7
+                                        }}
+                                    />
+                                )}
+                            </MapContainer>
+                        </div>
                     </div>
                 </div>
             </div>

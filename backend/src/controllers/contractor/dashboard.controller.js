@@ -1,4 +1,5 @@
 const supabase = require('../../services/supabase');
+const FinternetService = require('../../services/finternet.service');
 
 /**
  * Get aggregated data for the Contractor Dashboard
@@ -17,6 +18,7 @@ const getDashboardData = async (req, res) => {
             .from('work_orders')
             .select(`
                 *,
+                finternet_intent_id,
                 reports:report_id (*),
                 contractor:profiles!contractor_id(full_name, email)
             `)
@@ -92,7 +94,7 @@ const requestMilestoneVerification = async (req, res) => {
         const milestones = [...order.milestones];
         if (!milestones[milestoneIndex]) throw new Error('Milestone index out of bounds');
 
-        // 2. Update status to 'review' and store image
+        // 2. Update status to 'review' and store image locally
         milestones[milestoneIndex].status = 'review';
         milestones[milestoneIndex].evidence_url = imageUrl || null;
 
@@ -102,6 +104,22 @@ const requestMilestoneVerification = async (req, res) => {
             .eq('id', orderId);
 
         if (updateError) throw updateError;
+        console.log(`📤 [DB] Work Order ${orderId} milestone ${milestoneIndex} updated to 'review'.`);
+
+        // 💰 FINRENET INTEGRATION: Trigger Proof Submission automatically
+        if (order.finternet_intent_id) {
+            try {
+                console.log(`📡 [Finternet] Triggering automated proof submission for internal verification request...`);
+                await FinternetService.submitProof(order.finternet_intent_id, {
+                    proofHash: `0x${Buffer.from(imageUrl || 'default_evidence').toString('hex').slice(0, 32)}`,
+                    proofURI: imageUrl || 'https://city.gov/evidence/pending',
+                    submittedBy: order.contractor_id || 'contractor_anonymous'
+                });
+                console.log(`✅ [Finternet] Proof submission successful for intent: ${order.finternet_intent_id}`);
+            } catch (finError) {
+                console.error(`⚠️ [Finternet] Automated proof submission failed (non-critical):`, finError.message);
+            }
+        }
 
         res.json({ success: true, message: 'Verification requested with evidence' });
     } catch (error) {

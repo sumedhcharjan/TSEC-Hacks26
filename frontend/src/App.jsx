@@ -25,7 +25,10 @@ function App() {
 
     return (
         <Router>
-            <div className="min-h-screen">
+            <div className="min-h-screen relative overflow-x-hidden">
+                {/* Global Civic Grid Background */}
+                <div className="civic-grid" />
+
                 {/* Navigation Bar - Only show when logged in */}
                 {user && (
                     <nav className="sticky top-0 z-50 w-full bg-white shadow-sm border-b border-border">
@@ -36,7 +39,7 @@ function App() {
                                         <span className="text-lg sm:text-xl">🏙️</span>
                                     </div>
                                     <span className="text-lg sm:text-xl font-bold text-primary whitespace-nowrap">
-                                        Smart City <span className="hidden sm:inline">Platform</span>
+                                        InfraLink
                                     </span>
                                 </div>
                                 <div className="flex items-center space-x-2 sm:space-x-4 text-sm sm:text-base">

@@ -21,6 +21,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/citizen', citizenRoutes);
 app.use('/api/contractor', require('./routes/contractor/index.routes'));
 app.use('/api/announcements', require('./routes/announcement.routes'));
+app.use('/api/payments', require('./routes/payment.routes'));
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

@@ -2,112 +2,101 @@
 
 @theme {
     /* ===================================== */
-    /* PROFESSIONAL GOVERNMENT-TECH THEME */
-    /* Smart Urban Infrastructure Platform */
+    /* CIVIC-TECH PROFESSIONAL THEME */
     /* ===================================== */
 
-    /* PRIMARY COLORS - Deep Blue (Trust & Authority) */
+    /* PALETTE - GOVERNMENT STEWARDSHIP */
     --color-primary: #0A2540;
-    --color-primary-hover: #081d33;
-    --color-primary-light: #1a3a5a;
+    /* Navy - Trust */
+    --color-action: #1E6FD9;
+    /* Action Blue */
+    --color-accent-soft: #E6F0FF;
+    /* Tints */
+    --color-bg-white: #FFFFFF;
+    --color-card-bg: #F5F7FA;
+    /* Cold White */
 
-    /* SECONDARY COLORS - Medium Blue (Actions & Highlights) */
-    --color-secondary: #1E6FD9;
-    --color-secondary-hover: #1557b5;
-    --color-secondary-light: #4a8ee0;
-
-    /* ACCENT COLORS - Soft Cyan (Backgrounds & Highlights) */
-    --color-accent: #E6F0FF;
-    --color-accent-light: #F0F6FF;
-
-    /* BACKGROUNDS */
-    --color-background: #FFFFFF;
-    --color-surface: #F5F7FA;
-    --color-surface-hover: #EDF0F5;
-
-    /* TEXT COLORS */
-    --color-text-main: #0F172A;
+    /* TEXT */
+    --color-text-primary: #0F172A;
     --color-text-muted: #64748B;
-    --color-text-light: #94A3B8;
 
-    /* STATUS COLORS */
-    --color-success: #10B981;
-    --color-success-light: #D1FAE5;
-    --color-warning: #F59E0B;
-    --color-warning-light: #FEF3C7;
-    --color-danger: #EF4444;
-    --color-danger-light: #FEE2E2;
+    /* STATUS (SUBTLE) */
+    --color-status-success: #10B981;
+    --color-status-warning: #F59E0B;
+    --color-status-danger: #EF4444;
 
     /* BORDERS */
-    --color-border: #E2E8F0;
-    --color-border-light: #F1F5F9;
+    --color-border-subtle: #E2E8F0;
 }
 
 /* Base Styles */
 body {
-    background-color: var(--color-background);
-    color: var(--color-text-main);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-}
-
-/* Smooth Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-fadeIn {
-    animation: fadeIn 0.6s ease-out;
-}
-
-/* Professional Button Styles */
-.btn-primary {
-    background-color: var(--color-secondary);
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    border: none;
-}
-
-.btn-primary:hover {
-    background-color: var(--color-secondary-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(30, 111, 217, 0.2);
-}
-
-.btn-secondary {
     background-color: white;
-    color: var(--color-secondary);
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    border: 2px solid var(--color-secondary);
+    color: var(--color-text-primary);
+    font-family: 'Inter', 'Poppins', sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
-.btn-secondary:hover {
-    background-color: var(--color-accent);
-    transform: translateY(-1px);
+/* Mandatory Grid Background Helper */
+.civic-grid {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    height: 100%;
+    width: 100%;
+    background-image:
+        linear-gradient(to right, #f1f5f9 1px, transparent 1px),
+        linear-gradient(to bottom, #f1f5f9 1px, transparent 1px);
+    background-size: 6rem 4rem;
+    opacity: 0.35;
 }
 
-/* Professional Card Styles */
-.card {
+/* Card Foundation */
+.civic-card {
+    background: var(--color-bg-white);
+    border-radius: 32px;
+    border: 1px solid var(--color-border-subtle);
+    box-shadow: 0 4px 20px -2px rgba(10, 37, 64, 0.05), 0 2px 10px -1px rgba(10, 37, 64, 0.02);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.civic-card:hover {
+    box-shadow: 0 30px 50px -12px rgba(10, 37, 64, 0.1), 0 10px 20px -5px rgba(10, 37, 64, 0.04);
+}
+
+/* Leaflet Popup Styliing */
+.civic-popup .leaflet-popup-content-wrapper {
+    border-radius: 16px;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-border-subtle);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.civic-popup .leaflet-popup-content {
+    margin: 0;
+    width: auto !important;
+}
+
+.civic-popup .leaflet-popup-tip {
     background: white;
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
-    border: 1px solid var(--color-border-light);
-    transition: all 0.2s;
 }
 
-.card:hover {
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border-subtle);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted);
 }
