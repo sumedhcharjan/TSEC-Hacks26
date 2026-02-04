@@ -19,6 +19,7 @@ app.use(express.json());
 app.use('/api', exampleRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/citizen', citizenRoutes);
+app.use('/api/announcements', require('./routes/announcement.routes'));
 
 // Health Check
 
@@ -26,3 +27,4 @@ app.use('/api/citizen', citizenRoutes);
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+// Backend restart trigger

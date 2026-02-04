@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthProvider";
 import { Link } from "react-router-dom";
+import AnnouncementsFeed from "../../components/citizen/AnnouncementsFeed";
 
 const CitizenDashboard = () => {
     const { user } = useAuth();
@@ -52,116 +53,104 @@ const CitizenDashboard = () => {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-                {/* Action Bar */}
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white rounded-xl p-6 shadow-sm border border-border">
-                    <div>
-                        <h2 className="text-xl font-semibold text-text-main">Your Dashboard</h2>
-                        <p className="text-sm text-text-muted mt-1">Manage and track your infrastructure reports</p>
-                    </div>
-                    <Link
-                        to="/report/new"
-                        className="bg-secondary hover:bg-secondary-hover text-white px-6 py-3 rounded-lg font-medium shadow-sm transition-all transform hover:-translate-y-0.5 flex items-center gap-2"
-                    >
-                        <span className="text-lg">+</span>
-                        Report New Issue
-                    </Link>
-                </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-text-muted">Total Reports</p>
-                                <p className="text-3xl font-bold text-primary mt-2">{reports.length}</p>
-                            </div>
-                            <div className="w-12 h-12 bg-accent rounded-lg flex items-center justify-center">
-                                <span className="text-2xl">📝</span>
-                            </div>
+                {/* Top Section: Action Bar & Stats */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Action Bar (Spans full width on mobile, 2 cols on large) */}
+                    <div className="lg:col-span-2 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white rounded-xl p-6 shadow-sm border border-border">
+                        <div>
+                            <h2 className="text-xl font-semibold text-text-main">Your Dashboard</h2>
+                            <p className="text-sm text-text-muted mt-1">Manage and track your infrastructure reports</p>
                         </div>
+                        <Link
+                            to="/report/new"
+                            className="bg-secondary hover:bg-secondary-hover text-white px-6 py-3 rounded-lg font-medium shadow-sm transition-all transform hover:-translate-y-0.5 flex items-center gap-2"
+                        >
+                            <span className="text-lg">+</span>
+                            Report New Issue
+                        </Link>
                     </div>
-                    <div className="bg-white rounded-xl p-6 shadow-sm border border-border">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-text-muted">Resolved</p>
-                                <p className="text-3xl font-bold text-success mt-2">
-                                    {reports.filter(r => r.status?.toUpperCase() === 'RESOLVED').length}
-                                </p>
-                            </div>
-                            <div className="w-12 h-12 bg-success-light rounded-lg flex items-center justify-center">
-                                <span className="text-2xl">✅</span>
-                            </div>
+
+                    {/* Community Stats Card */}
+                    <div className="bg-gradient-to-br from-secondary to-primary text-white rounded-xl p-6 shadow-md flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-medium text-white/80">Community Impact</p>
+                            <p className="text-3xl font-bold mt-2">Top 10%</p>
+                            <p className="text-xs text-white/70 mt-1">Active Contributor</p>
                         </div>
-                    </div>
-                    <div className="bg-gradient-to-br from-secondary to-primary text-white rounded-xl p-6 shadow-md">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-white/80">Community Impact</p>
-                                <p className="text-3xl font-bold mt-2">Top 10%</p>
-                                <p className="text-xs text-white/70 mt-1">Active Contributor</p>
-                            </div>
-                            <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                                <span className="text-2xl">🏆</span>
-                            </div>
+                        <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                            <span className="text-2xl">🏆</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Reports List */}
-                <div className="bg-white rounded-xl shadow-sm border border-border">
-                    <div className="px-6 py-4 border-b border-border flex justify-between items-center">
-                        <h2 className="text-lg font-semibold text-text-main">Your Reports</h2>
-                        <button className="text-sm text-secondary hover:text-secondary-hover font-medium">
-                            View All →
-                        </button>
-                    </div>
+                {/* Main Content Grid: Announcements & Reports */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                    {loading ? (
-                        <div className="p-12 text-center">
-                            <div className="flex flex-col items-center gap-3">
-                                <div className="w-12 h-12 border-4 border-accent border-t-secondary rounded-full animate-spin"></div>
-                                <p className="text-text-muted">Loading your reports...</p>
+                    {/* Left Column: Announcements Feed */}
+                    <AnnouncementsFeed />
+
+                    {/* Right Column: Reports List (Spans 2 cols) */}
+                    <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-border flex flex-col">
+                        <div className="p-6 border-b border-border flex justify-between items-center bg-gray-50/50">
+                            <h2 className="text-lg font-semibold text-text-main">Your Recent Reports</h2>
+                            <div className="flex gap-4 text-sm text-text-muted">
+                                <span className="flex items-center gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-success"></span> Resolved
+                                </span>
+                                <span className="flex items-center gap-1">
+                                    <span className="w-2 h-2 rounded-full bg-warning"></span> In Progress
+                                </span>
                             </div>
                         </div>
-                    ) : reports.length > 0 ? (
-                        <div className="divide-y divide-border">
-                            {reports.map((report) => (
-                                <div key={report.id} className="p-6 hover:bg-surface transition-colors">
-                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                        <div className="flex items-start gap-4 flex-1">
-                                            <div className="w-12 h-12 rounded-lg bg-accent flex items-center justify-center text-2xl flex-shrink-0">
-                                                {getCategoryIcon(report.category)}
-                                            </div>
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold text-text-main">{report.category || 'Unknown Issue'}</h3>
-                                                <p className="text-sm text-text-muted mt-1 line-clamp-1">
-                                                    {report.description?.substring(0, 100)}...
-                                                </p>
-                                                <div className="flex items-center gap-4 mt-2 text-xs text-text-light">
-                                                    <span>📍 {report.latitude?.toFixed(4)}, {report.longitude?.toFixed(4)}</span>
-                                                    <span>•</span>
-                                                    <span>{new Date(report.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+
+                        {loading ? (
+                            <div className="p-12 text-center">
+                                <div className="flex flex-col items-center gap-3">
+                                    <div className="w-12 h-12 border-4 border-accent border-t-secondary rounded-full animate-spin"></div>
+                                    <p className="text-text-muted">Loading your reports...</p>
+                                </div>
+                            </div>
+                        ) : reports.length > 0 ? (
+                            <div className="divide-y divide-border">
+                                {reports.map((report) => (
+                                    <div key={report.id} className="p-6 hover:bg-surface transition-colors">
+                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                            <div className="flex items-start gap-4 flex-1">
+                                                <div className="w-12 h-12 rounded-lg bg-accent flex items-center justify-center text-2xl flex-shrink-0">
+                                                    {getCategoryIcon(report.category)}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="font-semibold text-text-main">{report.category || 'Unknown Issue'}</h3>
+                                                    <p className="text-sm text-text-muted mt-1 line-clamp-1">
+                                                        {report.description?.substring(0, 100)}...
+                                                    </p>
+                                                    <div className="flex items-center gap-4 mt-2 text-xs text-text-light">
+                                                        <span>📍 {report.latitude?.toFixed(4)}, {report.longitude?.toFixed(4)}</span>
+                                                        <span>•</span>
+                                                        <span>{new Date(report.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <span className={`px-4 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap ${getStatusColor(report.status)}`}>
+                                                {report.status?.replace('_', ' ')}
+                                            </span>
                                         </div>
-                                        <span className={`px-4 py-1.5 rounded-full text-xs font-medium border whitespace-nowrap ${getStatusColor(report.status)}`}>
-                                            {report.status?.replace('_', ' ')}
-                                        </span>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="p-12 text-center">
-                            <div className="w-16 h-16 bg-surface rounded-full flex items-center justify-center mx-auto mb-4">
-                                <span className="text-3xl">📝</span>
+                                ))}
                             </div>
-                            <p className="text-text-muted mb-4">You haven't reported any issues yet</p>
-                            <Link to="/report/new" className="text-secondary hover:text-secondary-hover font-medium">
-                                Report your first issue →
-                            </Link>
-                        </div>
-                    )}
+                        ) : (
+                            <div className="p-12 text-center">
+                                <div className="w-16 h-16 bg-surface rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <span className="text-3xl">📝</span>
+                                </div>
+                                <p className="text-text-muted mb-4">You haven't reported any issues yet</p>
+                                <Link to="/report/new" className="text-secondary hover:text-secondary-hover font-medium">
+                                    Report your first issue →
+                                </Link>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

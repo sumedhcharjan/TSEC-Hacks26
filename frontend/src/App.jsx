@@ -28,15 +28,15 @@ function App() {
                     <nav className="sticky top-0 z-50 w-full bg-white shadow-sm border-b border-border">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <div className="flex justify-between h-16 items-center">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                                        <span className="text-xl">🏙️</span>
+                                <div className="flex items-center gap-2 sm:gap-3">
+                                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span className="text-lg sm:text-xl">🏙️</span>
                                     </div>
-                                    <span className="text-xl font-bold text-primary">
-                                        Smart City Platform
+                                    <span className="text-lg sm:text-xl font-bold text-primary whitespace-nowrap">
+                                        Smart City <span className="hidden sm:inline">Platform</span>
                                     </span>
                                 </div>
-                                <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-2 sm:space-x-4 text-sm sm:text-base">
                                     {role === 'admin' && (
                                         <>
                                             <a href="/admin" className="text-secondary hover:text-secondary-hover font-medium transition-colors">
@@ -49,7 +49,7 @@ function App() {
                                     )}
                                     {role === 'citizen' && (
                                         <a href="/dashboard" className="text-secondary hover:text-secondary-hover font-medium transition-colors">
-                                            My Dashboard
+                                            Dashboard
                                         </a>
                                     )}
                                     <LogoutButton />

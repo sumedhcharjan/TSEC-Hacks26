@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 const AdminIssues = () => {
     const navigate = useNavigate();
     const [issues, setIssues] = useState([]);
@@ -21,6 +24,46 @@ const AdminIssues = () => {
 
         fetchIssues();
     }, []);
+
+    const handleExport = () => {
+        const doc = new jsPDF();
+
+        // Title
+        doc.setFontSize(18);
+        doc.text("Infrastructure Issues Report", 14, 22);
+        doc.setFontSize(11);
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+
+        // Table Data
+        const tableColumn = ["ID", "Category", "Coordinates", "Risk Score", "Status", "Reported At"];
+        const tableRows = [];
+
+        issues.forEach(issue => {
+            const issueData = [
+                issue.id,
+                issue.category,
+                `${issue.latitude?.toFixed(4)}, ${issue.longitude?.toFixed(4)}`,
+                issue.risk_score,
+                issue.status.toUpperCase(),
+                new Date(issue.created_at).toLocaleDateString()
+            ];
+            tableRows.push(issueData);
+        });
+
+        // Generate Table
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 40,
+            theme: 'grid',
+            headStyles: { fillColor: [66, 139, 202] }, // Blue header
+            styles: { fontSize: 8 }
+        });
+
+        // Save PDF
+        doc.save(`infrastructure_issues_${new Date().toISOString().split('T')[0]}.pdf`);
+    };
 
     if (loading) return <div className="p-8 text-center text-gray-500">Loading issues...</div>;
 
@@ -46,8 +89,11 @@ const AdminIssues = () => {
                     <h1 className="text-2xl font-bold text-gray-900">Infrastructure Issues</h1>
                     <p className="text-sm text-gray-500 mt-1">Manage and track reported city incidents</p>
                 </div>
-                <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm">
-                    Export Report
+                <button
+                    onClick={handleExport}
+                    className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors font-medium text-sm flex items-center gap-2"
+                >
+                    <span>📄</span> Export Report
                 </button>
             </header>
 
