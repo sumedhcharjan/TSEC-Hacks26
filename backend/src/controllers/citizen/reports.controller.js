@@ -11,6 +11,22 @@ const createReport = async (req, res) => {
         const file = req.file;
 
         let image_url = null;
+        let risk_score = 50; // Default medium priority
+
+        // Predefined risk scores by category
+        const categoryRiskScores = {
+            'Road Damage': null,      // Will use ML prediction
+            'Streetlight': 65,         // Medium-high priority
+            'Water Leak': 85,          // High priority (safety concern)
+            'Garbage': 40,             // Medium-low priority
+            'Hazard': 90               // Very high priority (immediate danger)
+        };
+
+        // Check if category has predefined risk score
+        if (categoryRiskScores.hasOwnProperty(category) && categoryRiskScores[category] !== null) {
+            risk_score = categoryRiskScores[category];
+            console.log(`📋 Using predefined risk score for ${category}: ${risk_score}`);
+        }
 
         if (file) {
             // Sanitize filename
@@ -33,6 +49,18 @@ const createReport = async (req, res) => {
                 .getPublicUrl(fileName);
 
             image_url = publicUrlData.publicUrl;
+
+            // 🤖 ML INTEGRATION: Only for Road Damage category
+            if (category === 'Road Damage' && categoryRiskScores[category] === null) {
+                try {
+                    const mlService = require('../../services/mlService');
+                    risk_score = await mlService.calculateRiskScore(file.buffer, fileName);
+                    console.log(`🤖 ML-calculated risk score for Road Damage: ${risk_score}`);
+                } catch (mlError) {
+                    console.error('❌ ML service unavailable, using default:', mlError.message);
+                    risk_score = 70; // Default for road damage if ML fails
+                }
+            }
         } else if (req.body.image_url) {
             image_url = req.body.image_url;
         }
@@ -49,7 +77,7 @@ const createReport = async (req, res) => {
                     longitude: parseFloat(longitude),
                     image_url,
                     status: 'PENDING',
-                    risk_score: Math.floor(Math.random() * 100)
+                    risk_score
                 }
             ])
             .select();

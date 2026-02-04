@@ -1,49 +1,53 @@
 @import "tailwindcss";
 
 @theme {
-    /* 
-   * PROFESSIONAL CITY INFRASTRUCTURE THEME
-   * Clean, Trustworthy, Modern Blue & White
-   * ------------------------------------------------------------------
-   */
+    /* ===================================== */
+    /* PROFESSIONAL GOVERNMENT-TECH THEME */
+    /* Smart Urban Infrastructure Platform */
+    /* ===================================== */
 
-    /* Primary: Trustworthy Corporate Blue */
-    --color-primary: #2563ea;
-    /* Royal Blue */
-    --color-primary-hover: #1d4ed8;
-    /* Darker Blue */
+    /* PRIMARY COLORS - Deep Blue (Trust & Authority) */
+    --color-primary: #0A2540;
+    --color-primary-hover: #081d33;
+    --color-primary-light: #1a3a5a;
 
-    /* Secondary: Subtle Slate Blue for gradients/accents */
-    --color-secondary: #64748b;
-    /* Slate-500 */
+    /* SECONDARY COLORS - Medium Blue (Actions & Highlights) */
+    --color-secondary: #1E6FD9;
+    --color-secondary-hover: #1557b5;
+    --color-secondary-light: #4a8ee0;
 
-    /* Accent: Attention grabbing but professional */
-    --color-accent: #f59e0b;
-    /* Amber */
+    /* ACCENT COLORS - Soft Cyan (Backgrounds & Highlights) */
+    --color-accent: #E6F0FF;
+    --color-accent-light: #F0F6FF;
 
-    /* Functional Colors */
-    --color-success: #10b981;
-    /* Emerald */
-    --color-danger: #ef4444;
-    /* Red */
+    /* BACKGROUNDS */
+    --color-background: #FFFFFF;
+    --color-surface: #F5F7FA;
+    --color-surface-hover: #EDF0F5;
 
-    /* Backgrounds: Clean and High Contrast */
-    --color-background: #f8fafc;
-    /* Slate-50 *Very light gray/blue tint* */
-    --color-surface: #ffffff;
-    /* Pure White */
+    /* TEXT COLORS */
+    --color-text-main: #0F172A;
+    --color-text-muted: #64748B;
+    --color-text-light: #94A3B8;
 
-    /* Text: High Legibility */
-    --color-text-main: #0f172a;
-    /* Slate-900 *Almost Black* */
-    --color-text-muted: #64748b;
-    /* Slate-500 */
+    /* STATUS COLORS */
+    --color-success: #10B981;
+    --color-success-light: #D1FAE5;
+    --color-warning: #F59E0B;
+    --color-warning-light: #FEF3C7;
+    --color-danger: #EF4444;
+    --color-danger-light: #FEE2E2;
+
+    /* BORDERS */
+    --color-border: #E2E8F0;
+    --color-border-light: #F1F5F9;
 }
 
 /* Base Styles */
 body {
     background-color: var(--color-background);
     color: var(--color-text-main);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 /* Smooth Animations */
@@ -61,4 +65,49 @@ body {
 
 .animate-fadeIn {
     animation: fadeIn 0.6s ease-out;
+}
+
+/* Professional Button Styles */
+.btn-primary {
+    background-color: var(--color-secondary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-secondary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 111, 217, 0.2);
+}
+
+.btn-secondary {
+    background-color: white;
+    color: var(--color-secondary);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: 2px solid var(--color-secondary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-accent);
+    transform: translateY(-1px);
+}
+
+/* Professional Card Styles */
+.card {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+    border: 1px solid var(--color-border-light);
+    transition: all 0.2s;
+}
+
+.card:hover {
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
 }
