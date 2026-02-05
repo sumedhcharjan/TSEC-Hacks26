@@ -121,5 +121,5 @@ Due to restricted access to live municipal APIs:
 ## 📦 Local Setup
 
 ```bash
-git clone https://github.com/your-username/infralink.git
+git clone https://github.com/kalpm1110/infralink.git
 cd infralink
